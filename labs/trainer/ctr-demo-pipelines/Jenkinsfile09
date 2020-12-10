@@ -1,0 +1,91 @@
+pipeline {
+
+  environment {
+    projectName = "rest-demo"
+    imageName = "gedoplan-seminar/ctr-demo-rest"
+    imageVersion = "$BUILD_NUMBER"
+    kustomizeFolder = "src/main/k8s/demo-app-blue-green"
+    productionEnvironment = "production"
+    targetRepo = "http://gitbucket.infra/git/root/k8s-apps.git"
+  }
+
+  agent {
+    kubernetes {
+      label 'rest-exercise-build'
+      defaultContainer 'jnlp'
+      yamlFile 'src/main/k8s/demo-pod-deploy.yaml'
+    }
+  }
+  stages {
+    stage('Update Version') {
+      steps {
+        checkout scm: scm, poll: false
+        container('docker') {
+            sh "docker tag $imageName $imageName:$imageVersion"
+        }
+        container('kustomize') {
+          sh """
+            cd ${kustomizeFolder}
+            kustomize edit set image ${imageName}=${imageName}:${imageVersion}
+            """
+        }
+      }
+    }
+    stage('Push k8s Manifests to Git') {
+		  steps {
+	      container('git') {
+          script {
+					  gitPush(env.targetRepo,  env.projectName, env.productionEnvironment, env.imageVersion, env.workspace + "/" + env.kustomizeFolder)
+          }
+	      }
+	    }
+	  }
+    stage('Sync in Argo') {
+		  steps {
+	      container('argocd') {
+					sh """
+            curl -sSL --insecure -o /usr/local/bin/argocd https://\$ARGOCD_SERVER/download/argocd-linux-amd64
+            chmod +x /usr/local/bin/argocd
+            argocd app sync $projectName --insecure
+            argocd app wait $projectName --suspended --insecure
+          """
+	      }
+	    }
+	  }
+    stage('Promote to Production') {
+      steps {
+        timeout(time:2, unit:'HOURS') {
+          input message:'Promote ?'
+        }
+        container('argocd') {
+          sh """
+            argocd app actions run $projectName resume --kind=Rollout --all --insecure
+            argocd app wait $projectName --insecure
+          """
+        }
+      }
+    }
+  }
+}
+
+
+def gitPush(String targetRepo, String projectName, String projectEnvironment, String projectVersion, String folder) {
+  env.FOLDER_REPO = projectName + "/" + projectEnvironment
+  env.CHECKOUT_FOLDER = "/tmp/gitrepo"
+  sh """
+    git clone ${targetRepo} ${CHECKOUT_FOLDER}
+    mkdir -p ${CHECKOUT_FOLDER}/${FOLDER_REPO}
+    rm -rf ${CHECKOUT_FOLDER}/${FOLDER_REPO}/*
+    cp -R ${folder}/* ${CHECKOUT_FOLDER}/${FOLDER_REPO}/
+    cd ${CHECKOUT_FOLDER}
+    git add -A
+    git commit -m "${projectName} in der Version ${projectVersion} für Umgebung ${projectEnvironment} bereitgestellt"
+    git pull
+    git push
+    mkdir ${workspace}/tmp
+    git rev-parse HEAD > ${workspace}/tmp/commit
+    rm -rf ${CHECKOUT_FOLDER}
+  """
+  def commit = readFile "tmp/commit"
+  commit
+}

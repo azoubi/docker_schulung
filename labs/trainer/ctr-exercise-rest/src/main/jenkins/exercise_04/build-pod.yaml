@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: maven
+    image: maven:3.6.1-jdk-11-slim
+    command:
+    - cat
+    tty: true
+    volumeMounts:
+    - mountPath: /root/.m2/repository
+      name: m2
+  - name: docker
+    image: docker:latest
+    command:
+    - cat
+    tty: true
+    volumeMounts:
+    - mountPath: /var/run/docker.sock
+      name: docker
+  - name: kubectl
+    image: lachlanevenson/k8s-kubectl:v1.15.2
+    command:
+    - cat
+    tty: true
+  - name: kustomize
+    image: bitlayer/kustomize:v2.1.0
+    command:
+    - cat
+    tty: true
+  volumes:
+  - name: m2
+    persistentVolumeClaim:
+      claimName: maven-m2
+  - name: docker
+    hostPath:
+      path: /var/run/docker.sock

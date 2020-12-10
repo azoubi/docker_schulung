@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: exercise
+spec:
+  selector:
+    matchLabels:
+      name: exercise
+  template:
+    metadata:
+      labels:
+        name: exercise
+    spec:
+      containers:
+      - name: rest-exercise
+        image: gedoplan-seminar/ctr-exercise-rest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: web

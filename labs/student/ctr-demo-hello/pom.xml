@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>de.gedoplan</groupId>
+    <artifactId>build-master</artifactId>
+    <version>2019.6.1</version>
+    <relativePath />
+  </parent>
+
+  <groupId>de.gedoplan.training.student</groupId>
+  <artifactId>ctr-demo-hello</artifactId>
+  <version>2020.05.25_NORDLB_H_CTR-003</version>
+
+  <properties>
+    <java.code.version>1.8</java.code.version>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>gedoplanPublic</id>
+      <url>http://service.gedoplan.de/nexus/content/groups/public</url>
+    </repository>
+  </repositories>
+
+  <build>
+    <finalName>${project.artifactId}</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>de.gedoplan.seminar.docker.hello_world.HelloWorld</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

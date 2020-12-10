@@ -1,0 +1,10 @@
+pipeline { 
+  agent { label 'master' }
+  stages {
+    stage('Erste Stage') {
+      steps {
+        sh 'echo "Hello World"'
+      }
+    }
+  }
+}

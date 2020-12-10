@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>de.gedoplan</groupId>
+    <artifactId>build-master</artifactId>
+    <version>2019.6.1</version>
+    <relativePath />
+  </parent>
+
+  <groupId>de.gedoplan.training.trainer</groupId>
+  <artifactId>ctr-exercise-rest</artifactId>
+  <version>2020.05.25_NORDLB_H_CTR-003</version>
+
+  <packaging>war</packaging>
+
+  <properties>
+    <java.code.version>1.8</java.code.version>
+    <imagetag>gedoplan-seminar/${project.artifactId}</imagetag>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>gedoplanPublic</id>
+      <url>http://service.gedoplan.de/nexus/content/groups/public</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>jakarta.platform</groupId>
+      <artifactId>jakarta.jakartaee-api</artifactId>
+      <version>8.0.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.microprofile</groupId>
+      <artifactId>microprofile</artifactId>
+      <type>pom</type>
+      <version>3.3</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>${project.artifactId}</finalName>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>docker</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>io.fabric8</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <version>0.30.0</version>
+            <configuration>
+              <images>
+                <image>
+                  <name>${imagetag}</name>
+                  <build>
+                    <dockerFileDir>${project.basedir}</dockerFileDir>
+                  </build>
+                </image>
+              </images>
+            </configuration>
+            <executions>
+              <execution>
+                <id>docker:build</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>build</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+</project>

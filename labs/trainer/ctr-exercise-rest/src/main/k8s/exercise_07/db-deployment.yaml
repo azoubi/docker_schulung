@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: exercise-db
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      name: exercise-db
+  template:
+    metadata:
+      labels:
+        name: exercise-db
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.0.3
+        ports:
+        - containerPort: 3306
+          name: db
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: exercise-db
+                key: rootpassword
+          - name: MYSQL_DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: exercise-db
+                key: database
+          - name: MYSQL_USER
+            valueFrom:
+              secretKeyRef:
+                name: exercise-db
+                key: user
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: exercise-db
+                key: password
+        volumeMounts:
+          - mountPath: /var/lib/mysql
+            name: db-volume
+        readinessProbe:
+          exec:
+            command: ['/bin/sh', '-c', 'mysql -h 127.0.0.1 -u "$MYSQL_USER" -p"$MYSQL_PASSWORD" -D "$MYSQL_DATABASE" -e "SELECT 1"']
+          initialDelaySeconds: 5
+          periodSeconds: 2
+          timeoutSeconds: 1
+      volumes:
+      - name: db-volume
+        persistentVolumeClaim:
+          claimName: exercise-db

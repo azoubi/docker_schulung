@@ -1,0 +1,30 @@
+[separator=::]
+= ldap-browser: Tool zum Einsehen und Bearbeiten von LDAP-Server-Einträgen
+
+:toc: left
+:imagesdir: ./images
+
+:version: 281
+
+[start=0]
+== Vorbemerkung
+Wir geben in diesem Dokument Dateinamen im Windows-Format an. Für Linux ersetzen Sie bitte das Trennzeichen `\` durch `/`. 
+
+== Download 
+Wir verwenden _Gawor's LDAP Browser/Editor_, ein Open-Source-Programm, das ein GUI zur Bearbeitung von LDAP-Server-Einträgen anbietet. Das Programm ist zwar seit vielen Jahren nicht mehr aktualisiert worden, funktioniert aber recht gut. Es kann von `http://www.novell.com/coolsolutions/tools/downloads/browser{version}.zip` heruntergeladen werden.
+
+TIP: Bei Seminaren, die dieses Tool benötigen, wird der Download durch den Aufruf von `mvn`  im Verzeichnis `labs` bereits durchgeführt und in das Zielverzeichnis  `ldap-browser` entpackt. Dort ist dann auch schon die unten erwähnte Verbindungskonfiguration eingetragen.
+
+== Start des Browsers
+Der LDAP Browser kann im Verzeichnis `tools\target\ldap-browser` mit dem folgenden Befehl gestartet werden:
+
+`java -jar browser.jar`
+
+== Verbindungskonfiguration
+Das Programm verwendet per Default die Verbindungskonfiguration namens `browser`. Für den Connect zum im Seminar verwendeten LDAP Server werden die folgenden Verbindungsdaten benötigt:
+
+Host:: `localhost`
+Port:: `10389`
+Version:: `3`
+Base DN:: `dc=gedoplan,dc=de`
+Anonymous Bind:: ja

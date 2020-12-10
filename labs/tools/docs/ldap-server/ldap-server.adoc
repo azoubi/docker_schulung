@@ -1,0 +1,41 @@
+[separator=::]
+= ldap-server: Einfacher LDAP-Server auf Basis von Apache DS
+
+:toc: left
+:imagesdir: ./images
+
+:version: 2017-09-04
+
+[start=0]
+== Vorbemerkung
+Wir geben in diesem Dokument Dateinamen im Windows-Format an. Für Linux ersetzen Sie bitte das Trennzeichen `\` durch `/`. 
+
+== Download 
+Der LDAP-Server wurde von Josef Cacek als einfacher Wrapper von Apache DS ohne Persistenz programmiert und auf `https://github.com/kwart/ldap-server` veröffentlicht. Er besteht aus einem `.jar`-File, das von dort heruntergeladen werden kann. Im Seminar wird die Version _{version}_ genutzt.
+
+Im Verzeichnis `tools\setup\ldap-server` befinden sich einige Beispiel-Konfigurationsdateien (LDIF-Files), die zum beim Start des Servers genutzt werden können (s. u.). 
+
+TIP: Bei Seminaren, die dieses Tool benötigen, wird der Download durch den Aufruf von `mvn`  im Verzeichnis `labs` bereits durchgeführt, d. h. das erwähnte File `ldap-server-{version}.jar` und auch die Beispielkonfigurationen finden Sie dann im Verzeichnis `tools\target\ldap-server`.
+
+== Start des Servers mit Beispielkonfigurationen
+Der Server kann im Verzeichnis `tools\target\ldap-server` mit dem folgenden Befehl gestartet werden:
+
+`java -jar ldap-server-{version}.jar -a _sample.ldif_`
+
+Statt `_sample.ldif_` wird dabei eine der folgenden Beispielkonfigurationsdateien angegeben:
+
+* `gedoplan_sample_role2user.ldif`: 
++
+Verknüpfung der User und Gruppen durch Referenz der User in Attributen namens `member` in den Gruppen-Einträgen.
+
+* `gedoplan_sample_user2role.ldif`: 
++
+Verknüpfung der User und Gruppen durch Referenz der Gruppen in Attributen namens `roleOccupant` in den User-Einträgen.
+
+Beide Beispielkonfigurationen definieren folgende User:
+
+* `anonymous` (Passwort: `anonymous_123`, Gruppen: `guest`)
+* `hugo` (Passwort: `hugo_123`, Gruppen: `guest`, `demoRole`, `otherRole`)
+* `otto` (Passwort: `otto_123`, Gruppen: `guest`)
+
+Als Besonderheit ist die Gruppenmitgliedschaft für `otherRole` rekursiv durch d ie Mitgliedschaft in `demoRole` definiert.

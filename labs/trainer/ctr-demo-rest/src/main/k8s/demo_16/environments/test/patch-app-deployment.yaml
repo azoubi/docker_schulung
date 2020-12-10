@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  rest-demo
+spec:
+  template:
+    spec:
+      containers:
+      - name:  rest-demo
+        env:
+          - name: DEMO_TEXT_FILE
+            value: /demodata/textfile.txt
+        volumeMounts:
+        - name: textfile
+          mountPath: /demodata
+      volumes:
+      - name: textfile
+        configMap:
+          name: test-textfile

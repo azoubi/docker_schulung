@@ -1,0 +1,164 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: infra
+---
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: gitea-pvc
+  namespace: infra
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitea-deployment
+  namespace: infra
+  labels:
+    app: gitea
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitea
+  template:
+    metadata:
+      labels:
+        app: gitea
+    spec:
+      containers:
+      - name: gitea
+        image: gitea/gitea:1.8.3
+        ports:
+        - containerPort: 3000
+          name: gitea-http
+        volumeMounts:
+        - mountPath: /data
+          name: git-data
+        - mountPath: /data/gitea/conf
+          name: config
+      volumes:
+      - name: git-data
+        persistentVolumeClaim:
+          claimName: gitea-pvc
+      - name: config
+        configMap:
+          name: gitea-config
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: gitea-service
+  namespace: infra
+spec:
+  selector:
+    app: gitea
+  ports:
+  - name: gitea-http
+    port: 3000
+    targetPort: gitea-http
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: gitea
+  namespace: infra
+spec:
+  rules:
+  - host: gitea.localtest.me
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: gitea-service
+          servicePort: gitea-http
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitea-config
+  namespace: infra
+data:
+  app.ini: |
+    [repository]
+    ROOT = /data/git/repositories
+    [repository.local]
+    LOCAL_COPY_PATH = /data/gitea/tmp/local-repo
+    [repository.upload]
+    TEMP_PATH = /data/gitea/uploads
+
+    [server]
+    APP_DATA_PATH    = /data/gitea
+    SSH_DOMAIN       = localhost
+    HTTP_PORT        = 3000
+    ROOT_URL         = http://gitea.localtest.me/
+    DISABLE_SSH      = true
+    START_SSH_SERVER = true
+    LFS_CONTENT_PATH = /data/git/lfs
+    DOMAIN           = gitea.localtest.me
+    LFS_START_SERVER = true
+    LFS_JWT_SECRET   = EmX4_NNnU0o7eLGpkRkdgnCZ11VMeu0A98-UaOS-AQY
+    OFFLINE_MODE     = false
+
+    [database]
+    PATH     = /data/gitea/gitea.db
+    DB_TYPE  = sqlite3
+    HOST     = localhost:3306
+    NAME     = gitea
+    USER     = root
+    PASSWD   =
+    SSL_MODE = disable
+
+    [indexer]
+    ISSUE_INDEXER_PATH = /data/gitea/indexers/issues.bleve
+
+    [session]
+    PROVIDER_CONFIG = /data/gitea/sessions
+    PROVIDER        = file
+
+    [picture]
+    AVATAR_UPLOAD_PATH      = /data/gitea/avatars
+    DISABLE_GRAVATAR        = false
+    ENABLE_FEDERATED_AVATAR = true
+
+    [attachment]
+    PATH = /data/gitea/attachments
+
+    [log]
+    ROOT_PATH = /data/gitea/log
+    MODE      = file
+    LEVEL     = Info
+
+    [security]
+    INSTALL_LOCK   = true
+    SECRET_KEY     = soLGZ5uztb8cXGt5zQxAX8shA9GRNg2QEcm1dvLZYYVEMbwOm03RkXDsSDUwqQxz
+    INTERNAL_TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjE1NjMyMDExNDZ9.8Mlvr_SO9Z2hdeKWzPacQrIrjCxXwONm_vo4IkJR4kU
+
+    [service]
+    DISABLE_REGISTRATION              = false
+    REQUIRE_SIGNIN_VIEW               = false
+    REGISTER_EMAIL_CONFIRM            = false
+    ENABLE_NOTIFY_MAIL                = false
+    ALLOW_ONLY_EXTERNAL_REGISTRATION  = false
+    ENABLE_CAPTCHA                    = false
+    DEFAULT_KEEP_EMAIL_PRIVATE        = false
+    DEFAULT_ALLOW_CREATE_ORGANIZATION = true
+    DEFAULT_ENABLE_TIMETRACKING       = true
+    NO_REPLY_ADDRESS                  = noreply.example.org
+
+    [oauth2]
+    JWT_SECRET = e189Ii2p_9LuF400C8qAqnRDPcnIqswAAdCj-5D-_N0
+
+    [mailer]
+    ENABLED = false
+
+    [openid]
+    ENABLE_OPENID_SIGNIN = true
+    ENABLE_OPENID_SIGNUP = true

@@ -1,0 +1,201 @@
+
+pipeline {
+
+	environment {
+    projectName = "rest-exercise"
+    imageName = "gedoplan-seminar/ctr-exercise-rest"
+    kustomizeFolder = "src/main/k8s/exercise_08"
+    productionBranch = "master"
+    productionEnvironment = "production"
+    projectEnvironment = "$BRANCH_NAME"
+    targetRepo = "http://gitbucket.infra/git/root/k8s-apps.git"
+  }
+
+  agent none
+
+  stages {
+    stage('Build') {
+      agent {
+        kubernetes {
+		      label 'rest-exercise-build'
+		      defaultContainer 'jnlp'
+          yamlFile 'src/main/jenkins/exercise_06/build-pod.yaml'
+	      }
+      }
+      stages {
+		    stage('Determine Version') {
+		      steps {
+            milestone label: 'Beginn', ordinal: 1
+	          script {
+              env.imageVersion = determineVersion(env.BRANCH_NAME, env.productionBranch, env.GIT_COMMIT)
+            }
+	        }
+	      }
+        stage('Maven Build') {
+		      steps {
+	          container('maven') {
+	            sh 'mvn -B package'
+	          }
+	        }
+	      }
+        stage('Docker Build') {
+		      steps {
+	          container('docker') {
+	            sh 'docker build -t ${imageName}:${imageVersion} .'
+              milestone label: 'App build an tested', ordinal: 2
+	          }
+	        }
+	      }
+      }
+    }
+
+    stage('Prepare Release') {
+      when {
+        branch "$productionBranch"
+      }
+      agent none
+      steps {
+        timeout(time:2, unit:'HOURS') {
+          input message:'Deploy to Staging ?'
+          milestone label: 'Deploy to Staging', ordinal: 3
+        }
+      }
+    }
+
+    stage('Release') {
+      when {
+        branch "$productionBranch"
+      }
+      options {
+        lock('deployment')
+      }
+      stages {
+        stage('Staging') {
+          agent {
+            kubernetes {
+		          label 'rest-exercise-build'
+		          defaultContainer 'jnlp'
+              yamlFile 'src/main/jenkins/exercise_06/deploy-pod.yaml'
+	          }
+          }
+          stages{
+            stage('Update Yamls') {
+		          steps {
+	              container('kustomize') {
+	                sh '''
+						        cd ${kustomizeFolder}/bases/app
+						        kustomize edit set image ${imageName}=${imageName}:${imageVersion}
+					        '''
+	              }
+	            }
+	          }
+		        stage('Push k8s Manifests to Git') {
+		          steps {
+	              container('git') {
+                  script {
+					          env.appCommit = gitPush(env.targetRepo,  env.projectName, env.projectEnvironment, env.imageVersion, env.workspace + "/" + env.kustomizeFolder)
+                  }
+	              }
+	            }
+	          }
+            stage('Sync in Argo') {
+		          steps {
+	              container('argocd') {
+					        sh """
+                    curl -sSL --insecure -o /usr/local/bin/argocd https://\$ARGOCD_SERVER/download/argocd-linux-amd64
+                    chmod +x /usr/local/bin/argocd
+                    argocd app sync ${projectName}-staging --insecure
+                    argocd app wait ${projectName}-staging --insecure
+                  """
+	              }
+                 milestone label: 'Deployed in Staging', ordinal: 4
+	            }
+	          }
+          }
+        }
+        stage('Promote to Production') {
+          agent none
+          steps {
+            timeout(time:2, unit:'HOURS') {
+              input message:'Promote to Production ?'
+              milestone label: 'Deploy in Production', ordinal: 5
+            }
+          }
+        }
+
+        stage('Deployment') {
+          agent {
+            kubernetes {
+		          label 'rest-exercise-build'
+		          defaultContainer 'jnlp'
+              yamlFile 'src/main/jenkins/exercise_06/deploy-pod.yaml'
+	          }
+          }
+          stages{
+		        stage('Push k8s Manifests to Git') {
+		          steps {
+	              container('git') {
+                  sh """
+                    git clone ${targetRepo} /tmp/sourcerepo
+                    cd /tmp/sourcerepo
+                    git checkout ${appCommit}
+                  """
+                  script {
+					          gitPush(env.targetRepo,  env.projectName, env.productionEnvironment, env.imageVersion, "/tmp/sourcerepo/"+env.projectName+"/"+env.projectEnvironment)
+                  }
+	              }
+	            }
+	          }
+            stage('Sync in Argo') {
+		          steps {
+	              container('argocd') {
+					        sh """
+                    curl -sSL --insecure -o /usr/local/bin/argocd https://\$ARGOCD_SERVER/download/argocd-linux-amd64
+                    chmod +x /usr/local/bin/argocd
+                    argocd app sync $projectName --insecure
+                    argocd app wait $projectName --insecure
+                  """
+	              }
+                milestone label: 'Deployed in Production', ordinal: 6
+	            }
+	          }
+          }
+        }
+      }
+    }
+  }
+}
+
+def determineVersion(String branchName, String productionBranchName, String gitCommit) {
+  pom = readMavenPom file: 'pom.xml'
+  versionPrefix = ""
+  if(!branchName.equals(productionBranchName) ) {
+    imageVersion = "dev-"
+  }
+  pomVersion = 1//pom.version.replaceAll('-SNAPSHOT','').replaceAll('\\.','_')
+  buildTimestamp = new Date(currentBuild.startTimeInMillis).format("yyyyMMdd_HH")
+  gitHashShort = sh(returnStdout: true, script: "printf \$(git rev-parse --short ${gitCommit})")
+  imageVersion = versionPrefix + pomVersion+ "-" + buildTimestamp + "-" + gitHashShort
+  imageVersion
+}
+def gitPush(String targetRepo, String projectName, String projectEnvironment, String projectVersion, String folder) {
+  env.FOLDER_REPO = projectName + "/" + projectEnvironment
+  env.CHECKOUT_FOLDER = "/tmp/gitrepo"
+  sh """
+    git clone ${targetRepo} ${CHECKOUT_FOLDER}
+    mkdir -p ${CHECKOUT_FOLDER}/${FOLDER_REPO}
+    rm -rf ${CHECKOUT_FOLDER}/${FOLDER_REPO}/*
+    cp -R ${folder}/* ${CHECKOUT_FOLDER}/${FOLDER_REPO}/
+    cd ${CHECKOUT_FOLDER}
+    git add -A
+    git commit -m "${projectName} in der Version ${projectVersion} für Umgebung ${projectEnvironment} bereitgestellt"
+    git pull
+    git push
+    mkdir ${workspace}/tmp
+    git rev-parse HEAD > ${workspace}/tmp/commit
+    rm -rf ${CHECKOUT_FOLDER}
+  """
+  def commit = readFile "tmp/commit"
+  commit
+}
+

@@ -1,0 +1,13 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: exercise
+spec:
+  rules:
+  - host: exercise.localtest.me
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: rest-exercise
+          servicePort: web

@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: ctr-demo-rest
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      name: ctr-demo-rest
+  template:
+    metadata:
+      labels:
+        name: ctr-demo-rest
+    spec:
+      containers:
+      - image:  gedoplan-seminar/ctr-demo-rest
+        name:  rest-demo
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort:  8080
+          name:  web
+

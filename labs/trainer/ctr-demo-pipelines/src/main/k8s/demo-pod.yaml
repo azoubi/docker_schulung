@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: alpine
+    image: alpine
+    command:
+    - cat
+    tty: true
+    env:
+    - name: MY_POD_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.name
+  - name: minideb
+    image: bitnami/minideb
+    command:
+    - cat
+    tty: true

@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  rest-demo
+spec:
+  selector:
+    matchLabels:
+      name: rest-demo
+  template:
+    metadata:
+      labels:
+        name:  rest-demo
+    spec:
+      containers:
+      - image:  gedoplan-seminar/ctr-demo-rest
+        name:  rest-demo
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort:  8080
+          name:  web
+        env:
+          - name: DEMO_TEXT_FILE
+            value: /demodata/myfile.txt
+        volumeMounts:
+          - name: textfile
+            mountPath: /demodata
+      - image: alpine:3
+        name: rest-demo-sidecar
+        command: ["/bin/sh"]
+        args: ["-c", "echo 'Hello from rest-demo-sidecar' > /demodata/myfile.txt; cat"]
+        tty: true
+        volumeMounts:
+          - name: textfile
+            mountPath: /demodata
+      volumes:
+        - name: textfile
+          emptyDir: {}

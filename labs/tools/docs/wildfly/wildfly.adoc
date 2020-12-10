@@ -1,0 +1,95 @@
+[separator=::]
+= WildFly: Installation und Konfiguration des Application Servers
+
+:toc: left
+:imagesdir: ./images
+
+:version: 16.0.0.Final
+
+[start=0]
+== Vorbemerkung
+Wir geben in diesem Dokument Dateinamen im Windows-Format an. Für Linux ersetzen Sie bitte das Trennzeichen `\` durch `/`. 
+
+Kommandoskripte sind für Windows i. d. R. `.bat`-Dateien (teilweise sind auch `.cmd` oder `.ps1` vorhanden). Unter Linux nehem Sie stattdessen `.sh`-Dateien.
+
+
+== Installation und Konfiguration der Server Runtime für das Seminar
+
+TIP: Bei Seminaren, die WildFly benötigen, werden die hier beschriebenen Schritte (Download, Installation, Anpassen der Konfiguration, Einrichten von Ressourcen) durch den Aufruf von `mvn`  im Verzeichnis `labs` bereits durchgeführt. Der Server steht Ihnen im Verzeichnis `labs\tools\target\wildfly-{version}` zur Verfügung. Das Unterverzeichnis `standalone-seminar` enthält die für das Seminar angepasste Serverkonfiguration.
+
+=== Download und Installation
+WildFly kann von http://wildfly.org/downloads/ heruntergeladen werden. Im Seminar wird die sog. _Java EE7 Full & Web Distribution_ in der Version _{version}_ genutzt.
+
+Das heruntergeladene File `wildfly-{version}.zip` (bzw. `.tgz`) kann an beliebiger Stelle entpackt werden. Dabei entsteht ein neues Verzeichnis namens `wildfly-{version}`, das im Rest dieses Dokumentes mit `<wfly_home>` bezeichnet wird. 
+
+=== Erzeugung einer an das Seminar angepassten Konfiguration
+Wir nutzen den Server im Seminar im sog. Standalone-Modus. Um die Grundkonfiguration im Verzeichnis `<wfly_home>\standalone` unangetastet zu lassen ist es empfehlenswert, eine Kopie dieses Verzeichnisses als `<wfly_home>\standalone-seminar` anzulegen. Im Folgenden wird davon ausgegangen, dass eine solche Kopie erstellt wurde. Wenn Sie bevorzugen, mit der Auslieferversion zu arbeiten, ersetzen Sie im Folgenden einfach `standalone-seminar` durch `standalone`.
+
+=== Start und Stopp des Servers
+Der Server wird durch den folgenden Befehl gestartet: +
+`<wfly_home>\bin\standalone.bat -Djboss.server.base.dir=<wfly_home>\standalone-seminar --server-config=standalone-full.xml` +
+
+Zum Stopp des Servers kann im Server-Fenster `Strg-C` genutzt werden.
+
+TIP: Im Seminar (und auch sonst zur Entwicklung von Software) ist es empfehlenswert, den Server nicht wie gezeigt separat zu starten, sondern ihn in die genutzte IDE zu integrieren und von dort zu kontrollieren. 
+
+=== Konfiguration der im Seminar genutzten Ressourcen
+==== Seminar-Datasource
+Als Datenbank nutzen wir eine H2-Datenbank. Ihr Treiber ist im WildFly bereits vorhanden. Die Konfiguration der zugehörigen Datasource im Server kann mit Hilfe des sog. _JBoss Command Lined Interface_ erfolgen. Dazu starten Sie bei laufendem Server das Skript `<wfly_home>\bin\jboss-cli.bat` und geben darin die folgenden Befehle:
+----
+connect
+/subsystem=datasources/data-source=seminar:add(jndi-name=java:/jdbc/seminar, connection-url="jdbc:h2:~/h2/seminar;AUTO_SERVER=TRUE", driver-name=h2, user-name=seminar, password=seminar)
+quit 
+----
+
+== Integration des Servers in die IDE
+=== Eclipse
+* Fügen Sie die View `Servers` Ihrer genutzten Perspektive hinzu. Dazu nutzen Sie den Menüpunkte `Window` -> `Preferences` -> `Show View` -> `Other...`  und wählen die View namens `Servers` aus. 
+* Klicken Sie mit der rechten Maustaste in den freien Bereich der View `Servers` , wählen aus dem Kontextmenü `New` -> `Server`, klicken aus dem Ordner `JBoss Community` den Eintrag mit der passenden Version und nennen den neuen Eintrag `WildFly {version} seminar`. Sollte es noch keinen Eintrag für die Version `{version}` geben, nehmen Sie den Eintrag mit der höchsten Versionsnummer.
++
+(Die folgenden Screenshots sind auf Basis einer älteren Version entstanden)
+
+
+image::eclipse-server.png[]
+
+* Nach zweimaligem Klick auf `Next` konfigurieren Sie die _JBoss Runtime_ mit den folgenden Parametern: +
+Name: `WildFly {version} seminar` +
+Home Directory: `<wfly_home>` +
+Runtime JRE: JDK der Version `8` oder `11` +
+Server Base Directory: `standalone-seminar` +
+Configuration File: `standalone-full.xml`
+
+image::eclipse-runtime.png[]
+
+* Nach Abschluss des Konfigurationsdialogs mit `Finish` erscheint ein entsprechender Eintrag in der View `Servers`. Nach einem Rechtsklick darauf kann der Server gestartet (und später auch wieder gestoppt) werden. 
+
+image::eclipse-startstop.png[]
+
+== Deployment von Anwendungen
+Anwendungen können per Drag-and-Drop in den Server gebracht werden. Dazu ziehen Sie das gewünschte Projekt aus der View `Package Explorer` (oder `Projekt Explorer`) auf den Servereintrag in der View `Servers`. Die Anwendung erscheint dann dort eingerückt unterhalb des Servereintrags und kann mit einem Rechtsklick erneut deployt (`Full Publish`) oder wieder entfernt werden (`Remove`).
+
+image::eclipse-deployment.png[]
+
+== Konfiguration des Logging-Systems
+Die Protokollausgaben des Servers erscheinen in der View `Console` (und zusätzlich noch in einer Log-Datei). Im Auslieferzustand werden nur Meldungen mit einem Schwellwert von `INFO` oder höher angezeigt.
+
+Änderungen daran können am einfachsten mit der Web-Anwendung _WildFly Management_ erfolgen. Um sie nutzen zu können, wird ein administrativer User benötigt. Bei einem für das Seminar vorkonfigurierten Server ist bereits ein User `admin` mit dem Passwort `admin_123` vorhanden. Sollte das nicht der Fall sein, öffnen Sie bitte ein Kommandofenster im Verzeichnis `<wfly_home>\bin` und starten das Kommando 
+`add-user.bat -sc ..\standalone-seminar\configuration -u admin -p admin_123`.  Damit wird der o. a. Administrations-User in die Konfigurationsdatei `<wfly_home>\standalone-seminar\configuration\mgmt-users.properties` eingetragen. 
+
+Nun können Sie (bei laufendem Server) die Web-Anwendung _WildFly Management_ mit einem Web-Browser Ihrer Wahl unter `http://localhost:9990` aufrufen, sich mit dem User `admin` anmelden und den Menüpunkt `Configuration` -> `Subsystems` -> `Logging` auswählen.
+
+image::mgmt-logging-subsystem.png[]
+
+Nach Klick auf `View`, `LOG HANDLERS` und `CONSOLE` ändern Sie das `Level` von `INFO` auf `ALL`.
+
+image::mgmt-logging-handler.png[]
+
+Schließlich legen Sie in `LOG CATEGORIES` mit Hilfe des Buttons `Add` einen neuen Logger mit folgenden Parametern an: +
+Name: `de.gedoplan` +
+Category: `de.gedoplan` +
+Level: `DEBUG` +
+Use parent handlers: [x]
+
+image::mgmt-logging-logger.png[]
+
+Analog können Sie weitere Logger anlegen oder auch bestehende Einträge modifizieren. Die Änderungen werden sofort aktiv - auch ohne Neustart des Servers.

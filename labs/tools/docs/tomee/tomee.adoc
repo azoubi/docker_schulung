@@ -1,0 +1,115 @@
+[separator=::]
+= TomEE: Installation und Konfiguration des Application Servers
+
+:toc: left
+:imagesdir: ./images
+
+:version: 7.0.4
+:classifier: plume
+
+[start=0]
+== Vorbemerkung
+Wir geben in diesem Dokument Dateinamen im Windows-Format an. Für Linux ersetzen Sie bitte das Trennzeichen `\` durch `/`. 
+
+Kommandoskripte sind für Windows i. d. R. `.bat`-Dateien (teilweise sind auch `.cmd` oder `.ps1` vorhanden). Unter Linux nehem Sie stattdessen `.sh`-Dateien.
+
+
+== Installation der Server Runtime
+TIP: Bei Seminaren, die TomEE benötigen, werden die in diesem Abschnitt beschriebenen Schritte (Download, Installation, Anpassen der Konfiguration, Einrichten von Ressourcen) durch den Aufruf von `mvn`  im Verzeichnis `labs` bereits durchgeführt. Der Server steht Ihnen im Verzeichnis `labs\tools\target\apache-tomee-{classifier}-{version}` zur Verfügung. Das Unterverzeichnis `base\seminar` enthält die für das Seminar angepasste Serverkonfiguration.
+
+=== Download und Installation
+TomEE kann von `http://tomee.apache.org/download-ng.html` heruntergeladen werden. Im Seminar wird die _TomEE {classifier} {version}_ genutzt. Die Variante _{classifier}_ bedeutet _Full Profile_ mit _Mojarra_ als JSF-Implementierung und _EclipseLink_ als JPA-Provider.
+
+Das heruntergeladene File `apache-tomee-{classifier}-{version}.zip` kann an beliebiger Stelle entpackt werden. Dabei entsteht ein neues Verzeichnis namens `apache-tomee-{classifier}-{version}`, das im Rest dieses Dokumentes mit `<tomee_home>` bezeichnet wird. 
+
+=== Erzeugung einer Server-Konfiguration für das Seminar
+Im Dokument `<tomee_home>\RUNNING.txt` wird beschrieben, wie TomEE mit _Multiple Instances_ betrieben werden kann. Damit ist es möglich, auf einem Rechner mehrere TomEE-Konfigurationen zu halten. Insbesondere kann so eine Seminar-Konfiguration erzeugt werden, die unabhngig von anderen TomEE-Konfigurationen auf dem gleichen Rechner betrieben werden kann. Gehen Sie dazu bitte wie folgt vor:
+
+* Erzeugen Sie ein neues Verzeichnis namens `<tomee_home>\base\seminar`.
+* Kopieren Sie die Verzeichnisse `conf` und `webapps` aus `<tomee_home>` nach `<tomee_home>\base\seminar`.
+* Legen Sie in `<tomee_home>\base\seminar` die Verzeichnisse `bin`, `lib`, `logs`, `temp` und `work` leer an.
+
+=== Konfiguration der im Seminar genutzten Ressourcen
+==== Seminar-Datasource
+Als Datenbank nutzen wir eine H2-Datenbank. Der Treiber dazu liegt im `tools\target`-Verzeichnis in der Datei `h2-x.y.z.jar`. Kopieren Sie diese Datei in das Verzeichnis `<tomee_home>\base\seminar\lib`.
+
+Fügen Sie dann die folgenden Elemente in die Konfigurationsdatei `<tomee_home>\base\seminar\conf\tomee.xml` ein:
+
+----
+    <Resource id="jdbc/temp" type="DataSource">
+      JdbcDriver org.hsqldb.jdbcDriver
+      JdbcUrl jdbc:hsqldb:mem:temp
+      UserName temp
+      Password
+    </Resource>
+
+    <Resource id="jdbc/seminar" type="DataSource">
+      JdbcDriver org.h2.Driver
+      JdbcUrl jdbc:h2:~/h2/seminar;AUTO_SERVER=TRUE
+      UserName seminar
+      Password seminar
+    </Resource>
+----
+
+== Start und Stopp des Servers
+Der Server kann mit dem Skript `startup.bat` im Verzeichnis `<tomee_home>\bin` gestartet werden. Zuvor müssen zwei Umgebungsvariablen gesetzt werden:
+
+* `CATALINA_HOME`: `<tomee_home>`,
+* `CATALINA_BASE`: `<tomee_home>\base\seminar`.
+
+TIP: Bei einem für das Seminar vorkonfigurierten Server finden Sie im Verzeichnis `<tomee_home>\base\seminar\bin` eine Skriptdatei namens `run_tomee.bat`, die Sie zum Serverstart verwenden können. 
+
+== Integration des Servers in die IDE
+=== Eclipse
+Leider gibt es noch keinen voll funktionalen Server Adapter for TomEE in Eclipse  (01/2018). Wenn Sie den Server wie gezeigt außerhalb von Eclipse starten, können Sie aber den Adapter _Basic/Deploy Only_ in Eclipse nutzen:
+
+* Fügen Sie die View `Servers` Ihrer genutzten Perspektive hinzu. Dazu nutzen Sie den Menüpunkte `Window` -> `Preferences` -> `Show View` -> `Other...`  und wählen die View namens `Servers` aus. 
+* Klicken Sie mit der rechten Maustaste in den freien Bereich der View `Servers` , wählen aus dem Kontextmenü `New` -> `Server`, klicken aus dem Ordner `Basic` den Eintrag `Deploy Only` an und nennen den neuen Eintrag `TomEE {classifier} {version} seminar`.
+
+Klicken Sie zweimal `Next` und geben Sie die folgenden Werte ein:
+
+** Deploy directory: `<tomee_home>\base\seminar\webapps`,
+** Temporary deploy directory: `<tomee_home>\base\seminar\temp`.
+
+image::eclipse-server.png[]
+
+* Nach Abschluss des Konfigurationsdialogs mit `Finish` erscheint ein entsprechender Eintrag in der View `Servers`. 
+
+Klicken Sie bitte doppelt auf diesen Eintrag, um die Konfiguration des Deployment-Adapters im Editor zu öffnen. Am unteren Rand des Editors finden Sie den Reiter `Deployment`. Wählen Sie ihn aus, aktivieren Sie die Checkbox `Deploy projects as compressed archives`, speichern Sie die Änderung und schließen Sie den Editor.
+
+image::eclipse-server2.png[]
+
+Mit einem Rechtsklick auf den Eintrag in der View `Servers` kann der Deployment-Adapter nun gestartet werden. 
+
+image::eclipse-startstop.png[]
+
+== Deployment von Anwendungen
+Anwendungen können per Drag-and-Drop in den Server gebracht werden. Dazu ziehen Sie das gewünschte Projekt aus der View `Package Explorer` (oder `Projekt Explorer`) auf den Servereintrag in der View `Servers`. Die Anwendung erscheint dann dort eingerückt unterhalb des Servereintrags und kann mit einem Rechtsklick erneut deployt (`Full Publish`) oder wieder entfernt werden (`Remove`).
+
+image::eclipse-deployment.png[]
+
+== Konfiguration des Logging-Systems
+In den Demo- und Übungsklassen wird _Apache Commons Logging_ zur Protokollierung verwendet. Es handelt sich dabei um ein Meta-Logging-Framework, das zur Laufzeit das Log-System des Zielservers verwendet.
+
+TomEE nutzt die Standardklassen aus `java.util.logging` zur Protokollierung. Die Log-Meldungen erscheinen in der Standardausgabe - der sog. Console - sowie u.a. in Dateien namens `catalina._yyyy-mm-dd_.log` im Verzeichnis `<tomee_home>\base\seminar\logs`.
+
+Die Konfiguration des Log-Systems erfolgt in der Datei `<tomee_home>\base\seminar\conf\logging.properties`. Fügen Sie dort Zeilen der folgenden Form an: +
+`_name_.level = _LEVEL_`
+
+`_name_` stellt darin üblicherweise einen Paket- oder Klassennamen dar. Für jeden Logger gilt die Einstellung, die seinen Namen am genauesten spezifiziert, d. h. ein Logger, der in der Anwendung mit dem Namen `de.gedoplan.seminar.cdi.demo.basics.presentation.DemoPresenter` erzeugt und genutzt wird, kann mit einem Konfigurationseintrag `de.gedoplan.level = FINE` konfiguriert werden. Gibt es dagegen auch einen Eintrag `de.gedoplan.seminar.cdi.demo.level = FINEST`, so gilt dieser.
+
+`_LEVEL_` bestimmt, ob Meldungen ausgegeben oder ausgefiltert werden, z. B.:
+
+* `SEVERE`: Fehlermeldungen (in anderen Log-Frameworks `ERROR`).
+* `WARNING`: Warnungen (in anderen Log-Frameworks `WARN`).
+* `INFO`: Allgemeine Infos (in anderen Log-Frameworks `INFO`).
+* `FINE`: Debug-Meldungen (in anderen Log-Frameworks `DEBUG`).
+* `FINEST`: Trace-Meldungen (in anderen Log-Frameworks `TRACE`).
+
+Im ersten Teil der Konfigurationsdatei sind u. a. analoge Schwellwerte für die verschiedenen Ausgabe-Kanäle - die sog. Handler - konfiguriert. Um zu erreichen, dass bspw. Trace-Meldungen auf der Console erscheinen, muss zusätzlich zum Logger-Level auch der des Handlers auf `FINEST` gesetzt werden:
+
+----
+org.apache.tomee.jul.formatter.AsyncConsoleHandler.level = FINEST
+----
+
+Änderungen der Logging-Konfiguration werden erst nach einem Neustart des Servers aktiv.

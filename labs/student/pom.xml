@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>de.gedoplan</groupId>
+    <artifactId>build-master</artifactId>
+    <version>2019.6.1</version>
+    <relativePath />
+  </parent>
+
+  <groupId>de.gedoplan.training.student</groupId>
+  <artifactId>student</artifactId>
+  <version>2020.05.25_NORDLB_H_CTR-003</version>
+  <packaging>pom</packaging>
+
+  <repositories>
+    <repository>
+      <id>gedoplanPublic</id>
+      <url>http://service.gedoplan.de/nexus/content/groups/public</url>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>gedoplanPublic</id>
+      <url>http://service.gedoplan.de/nexus/content/groups/public</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <properties>
+    <!-- Dieses Projekt soll kompatibel zur Version 8 sein -->
+    <java.code.version>1.8</java.code.version>
+
+    <!-- Branching-Modell ist GitHub Flow statt Git Flow, d. h. nur ein durchlaufende Branch -->
+    <gitflow.productionBranch>develop</gitflow.productionBranch>
+
+    <!-- Versionen einiger Dependencies im dependencyManagement (da dort mehrfach genutzt) -->
+    <eclipselink.version>2.7.4</eclipselink.version>
+    <derby.version>10.7.1.1</derby.version>
+    <hibernate.version>5.4.2.Final</hibernate.version>
+    <slf4j.version>1.7.25</slf4j.version>
+
+    <!-- Weitere Versionen von Dependencies (meist in Form von BOMs), die zwar nicht hier, aber in Kindprojekten deklariert werden -->
+    <kumuluzee.version>3.4.0</kumuluzee.version>
+    <springboot.version>1.5.4.RELEASE</springboot.version>
+
+    <!--
+      Scope der log4j-Dependencies.
+      Der Wert test ist für klassische Server-Anwendungen passend, weil dann nur im Test-Zweig expliztes Logging durchgeführt wird.
+      Für SE-Anwendungen muss die Property i. A. auf runtime gesetzt werden.
+    -->
+    <maven.scope.log4j>test</maven.scope.log4j>
+  </properties>
+
+  <build>
+    <defaultGoal>install</defaultGoal>
+    <finalName>${project.artifactId}</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <!--
+    Die Versionen sämtlicher Dependencies in edumat-Projekten sollen hier festgelegt werden mit folgenden Ausnahmen:
+    - Dependencies in Profilen oder in Plugin-Dependencies, falls der Aufwand zu hoch erscheint.
+    - Umfangreiche BOMs (bspw. für KumuluzEE oder Spring Boot); dafür sind entsprechende Versions-Properties vorgesehen.
+  -->
+  <dependencyManagement>
+    <dependencies>
+      <!-- JEE-Standard -->
+      <dependency>
+        <groupId>jakarta.platform</groupId>
+        <artifactId>jakarta.jakartaee-api</artifactId>
+        <version>8.0.0</version>
+      </dependency>
+      <dependency>
+        <groupId>javax</groupId>
+        <artifactId>javaee-api</artifactId>
+        <version>8.0</version>
+      </dependency>
+
+      <!-- Ex-Standard (ab Java 11) -->
+      <dependency>
+        <groupId>javax.xml.bind</groupId>
+        <artifactId>jaxb-api</artifactId>
+        <version>2.3.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.glassfish.jaxb</groupId>
+        <artifactId>jaxb-runtime</artifactId>
+        <version>2.3.1</version>
+      </dependency>
+
+      <!-- Diverse Standard-Implementierungen -->
+      <dependency>
+        <groupId>org.glassfish</groupId>
+        <artifactId>javax.el</artifactId>
+        <version>3.0.1-b11</version>
+      </dependency>
+
+      <!-- GEDOPLAN-baselibs -->
+      <dependency>
+        <groupId>de.gedoplan</groupId>
+        <artifactId>baselibs-enterprise</artifactId>
+        <version>1.5</version>
+      </dependency>
+
+      <dependency>
+        <groupId>de.gedoplan</groupId>
+        <artifactId>baselibs-faces</artifactId>
+        <version>1.4</version>
+      </dependency>
+
+      <dependency>
+        <groupId>de.gedoplan</groupId>
+        <artifactId>baselibs-naming</artifactId>
+        <version>1.3</version>
+      </dependency>
+
+      <dependency>
+        <groupId>de.gedoplan</groupId>
+        <artifactId>baselibs-persistence</artifactId>
+        <version>2.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>de.gedoplan</groupId>
+        <artifactId>baselibs-utils</artifactId>
+        <version>1.9</version>
+      </dependency>
+
+      <!-- Databases -->
+      <dependency>
+        <groupId>com.h2database</groupId>
+        <artifactId>h2</artifactId>
+        <version>1.4.193</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.derby</groupId>
+        <artifactId>derby</artifactId>
+        <version>${derby.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.derby</groupId>
+        <artifactId>derbyclient</artifactId>
+        <version>${derby.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.derby</groupId>
+        <artifactId>derbynet</artifactId>
+        <version>${derby.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>mysql</groupId>
+        <artifactId>mysql-connector-java</artifactId>
+        <version>5.1.14</version>
+      </dependency>
+
+      <!-- JPA-Provider & Co -->
+      <dependency>
+        <groupId>org.eclipse.persistence</groupId>
+        <artifactId>org.eclipse.persistence.jpa</artifactId>
+        <version>${eclipselink.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-entitymanager</artifactId>
+        <version>${hibernate.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-core</artifactId>
+        <version>${hibernate.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-ehcache</artifactId>
+        <version>${hibernate.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-infinispan</artifactId>
+        <version>${hibernate.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-envers</artifactId>
+        <version>${hibernate.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-search-orm</artifactId>
+        <version>5.11.1.Final</version>
+      </dependency>
+
+      <!-- Validation -->
+      <dependency>
+        <groupId>org.hibernate.validator</groupId>
+        <artifactId>hibernate-validator</artifactId>
+        <version>6.0.16.Final</version>
+      </dependency>
+
+      <!-- Logging -->
+      <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging</artifactId>
+        <version>1.2</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.logging.log4j</groupId>
+        <artifactId>log4j-bom</artifactId>
+        <version>2.9.1</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+
+      <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>1.2.17</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.jboss.logging</groupId>
+        <artifactId>jboss-logging</artifactId>
+        <version>3.4.0.Final</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-jdk14</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>jul-to-slf4j</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+
+      <!-- JUnit & Co -->
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.12</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.hamcrest</groupId>
+        <artifactId>hamcrest-all</artifactId>
+        <version>1.3</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.unitils</groupId>
+        <artifactId>unitils-core</artifactId>
+        <version>3.4.6</version>
+      </dependency>
+
+      <!-- Lombok -->
+      <dependency>
+        <groupId>org.projectlombok</groupId>
+        <artifactId>lombok</artifactId>
+        <version>1.18.8</version>
+      </dependency>
+
+      <!-- Liquibase -->
+      <dependency>
+        <groupId>org.liquibase</groupId>
+        <artifactId>liquibase-core</artifactId>
+        <version>3.5.3</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.liquibase</groupId>
+        <artifactId>liquibase-cdi</artifactId>
+        <version>3.5.3</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.mattbertolini</groupId>
+        <artifactId>liquibase-slf4j</artifactId>
+        <version>2.0.0</version>
+      </dependency>
+
+    </dependencies>
+  </dependencyManagement>
+
+  <modules>
+    <module>ctr-exercise-rest</module>
+    <module>ctr-exercise-galleon</module>
+    <module>ctr-demo-hello</module>
+    <module>ctr-demo-pipelines</module>
+    <module>ctr-infra</module>
+    <module>ctr-demo-jdk</module>
+    <module>ctr-demo-rest</module>
+    <module>ctr-exercise-wildfly</module>
+  </modules>
+</project>

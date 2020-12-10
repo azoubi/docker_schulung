@@ -1,0 +1,6 @@
+Proxy in Maven-Settings eintragen
+Proxy in Docker Desktop eintragen
+Für Downloads in Docker-Build Umgebungsvariablen für Proxy setzen
+Für Galleon Maven-Settings auf Image kopieren und Galleon zuweisen
+Für Jenkins im Init-Container umgebungsvariablen für Proxy setzen
+Für Maven-Build in Docker die Settings aus ConfigMap mounten

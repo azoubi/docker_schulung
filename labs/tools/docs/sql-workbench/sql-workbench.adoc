@@ -1,0 +1,59 @@
+[separator=::]
+= SQL Workbench/J: Einrichtung des DB-Tools
+
+:toc: left
+:imagesdir: ./images
+
+:version: 125
+
+[start=0]
+== Vorbemerkung
+Wir geben in diesem Dokument Dateinamen im Windows-Format an. Für Linux ersetzen Sie bitte das Trennzeichen `\` durch `/`. 
+
+== Download 
+SQL Workbench/J ist ein in Java geschriebenes, datenbankunanabhängiges Tool, mit dem man Daten in Datenbanken einsehen und bearbeiten kann. Die Anwendung kann von  `http://www.sql-workbench.eu/downloads.html` heruntergeladen werden. Im Seminar wird die Version _{version}_ genutzt.
+
+TIP: Bei Seminaren, die dieses Tool benötigen, wird der Download durch den Aufruf von `mvn`  im Verzeichnis `labs` bereits durchgeführt und die Anwendung im Verzeichnis  `tools\target\sql-workbench` bereitgestellt.
+
+== Start der Anwendung
+Im Verzeichnis `tools\target\sql-workbench` finden Sie einige Kommandos zum Start der Anwendung:
+
+Windows:: `SQLWorkbench.exe` (32 Bit) und `SQLWorkbench64.exe` (64 Bit)
+Linux:: `SQLWorkbench.sh`
+
+Die Anwendung kann alternativ auch durch `java -jar sqlworkbench.jar` gestartet werden.
+
+image::start.png[]
+
+== Konfiguration des H2-Treibers 
+Um eine Verbindung mit der Seminardatenbank öffnen zu können, muss zunächst der Treiber für die H2-Datenbank im Tool registriert werden. Klicken Sie dazu auf den Button `Manage Drivers` und wählen Sie links `H2 Database Engine` aus.
+
+image::driver.png[]
+
+Entfernen Sie den rot gedruckten Eintrag _h2.jar_, indem Sie ihn auswählen und den Lösch-Button klicken. Nutzen Sie dann den Browse-Button, um das im `tools\target`-Verzeichnis vorhandene `h2-....jar` einzutragen.
+
+image::driver2.png[]
+
+Schließen Sie den Dialog mit `OK`.
+
+== Einrichten einer Verbindung zur Seminardatenbank
+
+Füllen Sie im Dialog `Select Connection Profile` einen neuen Eintrag mit den folgenden Parametern: +
+Driver: `H2 Database Engine (org.h2.Driver)` +
+URL: `jdbc:h2:~/h2/seminar;AUTO_SERVER=TRUE` +
+Username: `seminar` +
+Password: `seminar`
+
+Nennen Sie den Eintrag bspw. `h2: seminar`, speichern Sie ihn mit Hilfe des Buttons `Save profile list` (Disketten-Icon) und öffnen Sie die Verbindung durch Klick auf `OK`.
+
+image::connection.png[]
+
+In dem dann angezeigten Fenster können SQL-Befehle ausgeführt werden.
+
+image::statement.png[]
+
+Mit dem Menü `Tools` -> `Show Database Explorer` können Sie eine weitere Ansicht aktivieren, in der die Tabellen links und ihre Inhalte rechts dargestellt werden.
+
+image::explorer.png[]
+
+TIP: Öffnen Sie die Verbindung zur Seminardatenbank mit der SQL Workbench/J vor dem Start von Anwendungen oder Servern, die ebenfalls eine Verbindung zur Datenbank öffnen. Die verwendete H2-Datenbank wird durch den Connect-Parameter `;AUTO_SERVER=TRUE` in einem Modus betrieben, in dem mehrere Anwendungen gleichzeitige Verbindungen zur Datenbank halten können (ohne diesen Parameter könnte zu einer Zeit immer nur eine Anwendung mit der Datenbank arbeiten). Dabei wird die erste Verbindung tatsächlich mit der Datenbank aufgebaut, jede weitere Verbindung benutzt dann die erste Anwendung als Server. Wenn Sie also die SQL Workbench/J als erstes verwenden, verbinden sich alle weiteren Anwendungen implizit über die SQL Workbench/J mit der Datenbank.  

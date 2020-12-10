@@ -1,0 +1,9 @@
+FROM izoubi/wildfly-app
+
+COPY --chown=jboss:jboss target/ctr-exercise-rest.war /opt/jboss/wildfly/standalone/deployments/
+
+# Enable property replacement in XML descriptors
+# As an alternative to this WildFly configuration you may just put the
+# datasource reference in persistence.xml into a comment
+COPY src/main/wildfly/wildfly-setup.cli /opt/jboss
+RUN /opt/jboss/wildfly/bin/jboss-cli.sh --file=/opt/jboss/wildfly-setup.cli || exit 0

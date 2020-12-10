@@ -1,0 +1,16 @@
+[separator=::]
+= HSQL: Datenbank-Treiber
+
+:toc: left
+:imagesdir: ./images
+
+:version: 2.5.0
+
+[start=0]
+== Vorbemerkung
+Wir geben in diesem Dokument Dateinamen im Windows-Format an. Für Linux ersetzen Sie bitte das Trennzeichen `\` durch `/`. 
+
+== Download 
+Die HSQL-Datenbank besteht aus nur einem `.jar`-File, das von `http://hsqldb.org/` heruntergeladen werden kann. Im Seminar wird die Version _{version}_ genutzt.
+
+TIP: Bei Seminaren, die dieses Tool benötigen, wird der Download durch den Aufruf von `mvn`  im Verzeichnis `labs` bereits durchgeführt, d. h. das erwähnte File `hsql-{version}.jar` finden Sie dann im Verzeichnis `tools\target`.

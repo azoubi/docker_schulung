@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/ctr-demo-hello/ctr-demo-hello.iml" filepath="$PROJECT_DIR$/ctr-demo-hello/ctr-demo-hello.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ctr-demo-jdk/ctr-demo-jdk.iml" filepath="$PROJECT_DIR$/ctr-demo-jdk/ctr-demo-jdk.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ctr-demo-pipelines/ctr-demo-pipelines.iml" filepath="$PROJECT_DIR$/ctr-demo-pipelines/ctr-demo-pipelines.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ctr-demo-rest/ctr-demo-rest.iml" filepath="$PROJECT_DIR$/ctr-demo-rest/ctr-demo-rest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ctr-exercise-galleon/ctr-exercise-galleon.iml" filepath="$PROJECT_DIR$/ctr-exercise-galleon/ctr-exercise-galleon.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ctr-exercise-rest/ctr-exercise-rest.iml" filepath="$PROJECT_DIR$/ctr-exercise-rest/ctr-exercise-rest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ctr-exercise-wildfly/ctr-exercise-wildfly.iml" filepath="$PROJECT_DIR$/ctr-exercise-wildfly/ctr-exercise-wildfly.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ctr-infra/ctr-infra.iml" filepath="$PROJECT_DIR$/ctr-infra/ctr-infra.iml" />
+      <module fileurl="file://$PROJECT_DIR$/student.iml" filepath="$PROJECT_DIR$/student.iml" />
+    </modules>
+  </component>
+</project>

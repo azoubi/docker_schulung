@@ -1,0 +1,14 @@
+
+This project contains multiple Dockerfile versions:
+
+- Dockerfile-nn-xyz reflecting the state of the course exercise nn
+- Dockerfile is a copy of the last Dockerfile-nn-xyz, i. e. reflects the final state
+
+In order to use any of them, you can
+
+- rename the corresponding file into the standard name Dockerfile and use the build command 
+  docker build -t <tag> .
+  
+- use the option -f to address the actual Dockerfile within the build command:
+  docker build -f Dockerfile-nn-xyz -t <tag> .
+

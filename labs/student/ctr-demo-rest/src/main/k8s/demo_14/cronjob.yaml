@@ -1,0 +1,16 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: change-file
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          containers:
+          - name: curl
+            image: byrnedo/alpine-curl:0.1.7
+            command: ["/bin/sh", "-c", "curl -X PUT -H 'Content-Type: text/plain' -d \"Hello from CronJob. Date: $(date)\" http://rest-demo/resources/modifiableFile"]
+          restartPolicy: OnFailure

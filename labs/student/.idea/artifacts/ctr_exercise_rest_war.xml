@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="ctr-exercise-rest:war">
+    <output-path>$PROJECT_DIR$/ctr-exercise-rest/target</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <module>ctr-exercise-rest</module>
+        <packaging>war</packaging>
+      </options>
+    </properties>
+    <root id="archive" name="ctr-exercise-rest.war">
+      <element id="artifact" artifact-name="ctr-exercise-rest:war exploded" />
+    </root>
+  </artifact>
+</component>

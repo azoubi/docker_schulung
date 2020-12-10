@@ -1,0 +1,31 @@
+pipeline { 
+  agent {
+    kubernetes {
+		  label 'demo-build'
+		  defaultContainer 'alpine'
+      yamlFile 'src/main/k8s/demo-pod.yaml'
+    }
+	}
+  environment {
+    VAR1 = "Inhalt von VAR1"
+    VAR2 = createVal()
+  }
+  stages {
+    stage('Set Variables') {
+      steps {
+        script{
+          env.VAR3 = createVal() + ' gesetzt in Script-Block'
+        }
+      }
+    }
+    stage('Ausgabe Variablen') {
+      steps {
+        sh 'echo -e "VAR1 = $VAR1\nVAR2 = $VAR2\nVAR3 = $VAR3"'
+      }
+    }
+  }
+}
+
+def createVal() {
+  'Inhalt aus Function'
+}

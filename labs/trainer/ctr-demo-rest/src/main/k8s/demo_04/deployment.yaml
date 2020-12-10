@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ctr-demo-rest
+spec:
+  selector:
+    matchLabels:
+      name: ctr-demo-rest
+  template:
+    metadata:
+      labels:
+        name: ctr-demo-rest
+    spec:
+      containers:
+      - image:  gedoplan-seminar/ctr-demo-rest
+        name:  rest-demo
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort:  8080
+          name:  web

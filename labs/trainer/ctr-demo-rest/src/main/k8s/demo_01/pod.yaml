@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ctr-demo-rest
+spec:
+  containers:
+  - image:  gedoplan-seminar/ctr-demo-rest
+    name:  rest-demo
+    imagePullPolicy: IfNotPresent
+    ports:
+    - containerPort:  8080
+      name:  web

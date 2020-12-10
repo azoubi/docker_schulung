@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: ctr-demo-rest
+  labels:
+    apptype: backend
+  annotations:
+    additionalInfo: | 
+      <xml>
+        <appinfo>
+          <name>ctr-demo-rest</name>
+          <beschreibung>Eine Demo-Anwendung für Kubernetes-Seminare</beschreibung>
+        </appinfo>
+      </xml>
+spec:
+  containers:
+  - image:  gedoplan-seminar/ctr-demo-rest
+    name:  rest-demo
+    imagePullPolicy: IfNotPresent
+    ports:
+    - containerPort:  8080
+      name:  web

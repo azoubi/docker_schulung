@@ -1,0 +1,95 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: gitbucket-pvc
+  namespace: infra
+  labels:
+    app: gitbucket
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitbucket
+  namespace: infra
+  labels:
+    app: gitbucket
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitbucket
+  template:
+    metadata:
+      labels:
+        app: gitbucket
+    spec:
+      initContainers:
+      - name: delete-tmp
+        image: centos:7.6.1810
+        command: ["rm", "-rf", "/gitbucket/tmp"]
+        volumeMounts:
+        - name: git-data
+          mountPath: /gitbucket
+      containers:
+      - name: gitbucket
+        image: gitbucket/gitbucket:4.29.0
+        ports:
+        - containerPort: 8080
+          name: gitbucket-http
+        volumeMounts:
+        - mountPath: /gitbucket
+          name: git-data
+        livenessProbe:
+          httpGet:
+            path: /signin
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /signin
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 15
+      volumes:
+      - name: git-data
+        persistentVolumeClaim:
+          claimName: gitbucket-pvc
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: gitbucket
+  namespace: infra
+  labels:
+    app: gitbucket
+spec:
+  selector:
+    app: gitbucket
+  ports:
+  - name: gitbucket-http
+    port: 80
+    targetPort: gitbucket-http
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: gitbucket
+  namespace: infra
+  labels:
+    app: gitbucket
+spec:
+  rules:
+  - host: gitbucket.localtest.me
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: gitbucket
+          servicePort: gitbucket-http

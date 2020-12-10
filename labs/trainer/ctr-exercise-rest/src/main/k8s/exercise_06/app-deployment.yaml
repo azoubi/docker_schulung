@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: exercise
+spec:
+  selector:
+    matchLabels:
+      name: exercise
+  template:
+    metadata:
+      labels:
+        name: exercise
+    spec:
+      containers:
+      - name: rest-exercise
+        image: gedoplan-seminar/ctr-exercise-rest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: web
+        env:
+          - name: MYSQL_SERVICE_HOST
+            value: exercise-db
+          - name: MYSQL_SERVICE_PORT
+            value: "3306"
+          - name: DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: exercise-db
+                key: database
+          - name: MYSQL_DATABASE
+            value: $(DATABASE)?useSSL=false
+          - name: MYSQL_USER
+            valueFrom:
+              secretKeyRef:
+                name: exercise-db
+                key: user
+          - name: MYSQL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: exercise-db
+                key: password
+          - name: DATASOURCE
+            value: MySQLDS
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 9990
+          initialDelaySeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 9990
+          initialDelaySeconds: 30

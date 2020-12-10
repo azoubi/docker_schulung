@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  rest-demo
+spec:
+  selector:
+    matchLabels:
+      name: rest-demo
+  template:
+    metadata:
+      labels:
+        name:  rest-demo
+    spec:
+      containers:
+      - image:  gedoplan-seminar/ctr-demo-rest
+        name:  rest-demo
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort:  8080
+          name:  web
+        env:
+        - name: MODIFIABLE_FILE
+          value: /filestorage/file.txt
+        volumeMounts:
+          - name: rest-demo-local
+            mountPath: /filestorage
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+      volumes:
+        - name: rest-demo-local
+          emptyDir: {}

@@ -1,0 +1,40 @@
+pipeline { 
+  agent none
+
+  stages {
+    stage('Start') {
+      agent {
+        kubernetes {
+		      label 'demo-build'
+		      defaultContainer 'alpine'
+          yamlFile 'src/main/k8s/demo-pod.yaml'
+        }
+      }
+      steps {
+        sh 'echo "Podname: $MY_POD_NAME"'
+      }
+    }
+    stage('Bestätigen') {
+      agent none
+      steps {
+        timeout(time:2, unit:'HOURS') {
+          input message:'Weiter mit dem nächsten Schritt ?'
+        }
+      }
+    }
+    stage('Ende') {
+      agent {
+        kubernetes {
+		      label 'demo-build'
+		      defaultContainer 'alpine'
+          yamlFile 'src/main/k8s/demo-pod.yaml'
+        }
+      }
+      steps {
+        sh 'echo "Podname: $MY_POD_NAME"'
+      }
+    }
+  }
+}
+
+

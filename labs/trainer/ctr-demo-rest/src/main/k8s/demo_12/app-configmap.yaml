@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rest-demo-config
+data:
+  textfile.txt: |
+    Hello from ConfigMap
+    Dies ist ein
+    mehrzeiliger
+    Text.
+  filename: textfile.txt

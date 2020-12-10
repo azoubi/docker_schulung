@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: rest-demo-db
+spec:
+  selector:
+    app.kubernetes.io/name: postgres
+  type: ClusterIP
+  ports:
+  - name: db
+    port:  5432
+    targetPort:  db

@@ -1,0 +1,5 @@
+embed-server --server-config=standalone-full.xml --std-out=discard
+/subsystem=deployment-scanner/scanner=default:write-attribute(name=scan-interval, value=1000)
+/subsystem=datasources/data-source=seminar:add(jndi-name=java:/jdbc/seminar, connection-url="jdbc:h2:~/h2/seminar;AUTO_SERVER=TRUE", driver-name=h2, user-name=seminar, password=seminar)
+/subsystem=messaging-activemq/server=default/jms-queue=SeminarQueue:add(entries=[java:/jms/queue/seminar,java:jboss/exported/jms/queue/seminar])
+/subsystem=messaging-activemq/server=default/jms-topic=SeminarTopic:add(entries=[java:/jms/topic/seminar,java:jboss/exported/jms/topic/seminar])

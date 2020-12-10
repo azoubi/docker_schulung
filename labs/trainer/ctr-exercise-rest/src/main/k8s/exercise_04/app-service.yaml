@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rest-exercise
+spec:
+  selector:
+    name: exercise
+  ports:
+  - port: 8080
+    name: web
+    targetPort: web

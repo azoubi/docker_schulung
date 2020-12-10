@@ -1,0 +1,13 @@
+apiVersion: skaffold/v1beta13
+kind: Config
+build:
+  artifacts:
+  - image: gedoplan-seminar/ctr-exercise-rest
+    context: .
+    sync:
+      manual:
+      - src: 'target/*.war'
+        dest: /opt/jboss/wildfly/standalone/deployments/ctr-exercise-rest.war
+deploy:
+  kustomize: 
+    path: src/main/k8s/exercise_08

@@ -1,0 +1,8 @@
+FROM openjdk:11.0.3
+
+#Alternative, custom base image
+#FROM gedoplan-seminar/ctr-demo-jdk:latest
+
+COPY target/ctr-demo-hello.jar /opt/ctr-demo-hello.jar
+
+ENTRYPOINT ["java", "-jar", "/opt/ctr-demo-hello.jar"]

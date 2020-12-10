@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: rest-app
+spec:
+  containers:
+    - image:  izoubi/rest-app
+      name:  rest-app
+      imagePullPolicy: IfNotPresent
+      ports:
+        - containerPort:  8080
+          name:  web

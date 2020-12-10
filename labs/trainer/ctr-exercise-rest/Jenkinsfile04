@@ -1,0 +1,77 @@
+
+pipeline {
+
+	environment {
+    projectName = "rest-exercise"
+    imageName = "gedoplan-seminar/ctr-exercise-rest"
+    kustomizeFolder = "src/main/k8s/exercise_08"
+    productionBranch = "master"
+  }
+
+  agent {
+    kubernetes {
+		  label 'rest-exercise-build'
+		  defaultContainer 'jnlp'
+      yamlFile 'src/main/jenkins/exercise_04/build-pod.yaml'
+	  }
+  }
+
+  stages {
+		stage('Determine Version') {
+		  steps {
+	      script {
+          env.imageVersion = determineVersion(env.BRANCH_NAME, env.productionBranch, env.GIT_COMMIT)
+        }
+	    }
+	  }
+    stage('Maven Build') {
+		  steps {
+	      container('maven') {
+	        sh 'mvn -B package'
+	      }
+	    }
+	  }
+    stage('Docker Build') {
+		  steps {
+	      container('docker') {
+	        sh 'docker build -t ${imageName}:${imageVersion} .'
+	      }
+	    }
+	  }
+		stage('Update Yamls') {
+		  steps {
+	      container('kustomize') {
+	        sh '''
+						cd ${kustomizeFolder}/bases/app
+						kustomize edit set image ${imageName}=${imageName}:${imageVersion}
+					'''
+	      }
+	    }
+	  }
+		stage('Deploy') {
+			when {
+        branch "${productionBranch}"
+      }
+		  steps {
+	      container('kubectl') {
+	        sh 'kubectl apply -k ${kustomizeFolder} --namespace=default'
+					sh 'kubectl rollout status deployment exercise --namespace=default'
+	      }
+	    }
+	  }
+  }
+}
+
+def determineVersion(String branchName, String productionBranchName, String gitCommit) {
+  pom = readMavenPom file: 'pom.xml'
+  versionPrefix = ""
+  if(!branchName.equals(productionBranchName) ) {
+    imageVersion = "dev-"
+  }
+  pomVersion = 1//pom.version.replaceAll('-SNAPSHOT','').replaceAll('\\.','_')
+  buildTimestamp = new Date(currentBuild.startTimeInMillis).format("yyyyMMdd_HH")
+  gitHashShort = sh(returnStdout: true, script: "printf \$(git rev-parse --short ${gitCommit})")
+  imageVersion = versionPrefix + pomVersion+ "-" + buildTimestamp + "-" + gitHashShort
+  imageVersion
+}
+

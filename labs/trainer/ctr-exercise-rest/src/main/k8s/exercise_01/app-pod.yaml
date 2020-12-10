@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: exercise
+spec:
+  containers:
+  - name: rest-exercise
+    image: gedoplan-seminar/ctr-exercise-rest
+    imagePullPolicy: IfNotPresent
+    ports:
+      - containerPort: 8080
+        name: web

@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name:  rest-demo
+spec:
+#  clusterIP: None
+  selector:
+    name:  rest-demo
+  ports:
+  - name:  web
+    port:  80
+    targetPort:  web

@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name:  rest-demo
+spec:
+  serviceName: rest-demo
+  selector:
+    matchLabels:
+      name: rest-demo
+  replicas: 2
+  volumeClaimTemplates:
+    - metadata:
+        name: rest-demo-local
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Mi
+  template:
+    metadata:
+      labels:
+        name:  rest-demo
+    spec:
+      containers:
+      - image:  gedoplan-seminar/ctr-demo-rest
+        name:  rest-demo
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort:  8080
+          name:  web
+        env:
+          - name: MODIFIABLE_FILE
+            value: /filestore/file.txt
+        volumeMounts:
+          - name: rest-demo-local
+            mountPath: /filestore
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+      # Workaround für Hostpath Volumes unter Docker Desktop oder Minikube, sollte eigentlich über securityContext.fsGroup gelöst werden.
+#      initContainers:
+#        - image: alpine
+#          name: chmod
+#          command: ["chmod", "777", "/filestore"]
+#          volumeMounts:
+#          - name: rest-demo-local
+#            mountPath: /filestore
+
+    

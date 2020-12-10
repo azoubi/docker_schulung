@@ -1,0 +1,21 @@
+
+FROM adoptopenjdk/openjdk11:jdk-11.0.3.7 as galleon
+
+ENV GALLEON_VERSION 4.2.5.Final 
+
+RUN apt-get update && apt-get install -y curl unzip
+RUN curl -Ls https://github.com/wildfly/galleon/releases/download/$GALLEON_VERSION/galleon-$GALLEON_VERSION.zip -o /tmp/galleon.zip
+RUN unzip /tmp/galleon.zip && mv /galleon-${GALLEON_VERSION} /galleon
+
+COPY provisioning.xml /tmp/provisioning.xml
+RUN /galleon/bin/galleon.sh provision /tmp/provisioning.xml --dir=/tmp/wildfly
+
+# - - -
+
+FROM adoptopenjdk/openjdk11:jdk-11.0.3_7-alpine-slim
+
+RUN mkdir -p /opt/jboss
+COPY --from=galleon /tmp/wildfly /opt/jboss/wildfly
+
+ENTRYPOINT [ "/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0" ]
+

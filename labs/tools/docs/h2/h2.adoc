@@ -1,0 +1,25 @@
+[separator=::]
+= H2: Treiber und Verbindungsparameter für die Seminardatenbank
+
+:toc: left
+:imagesdir: ./images
+
+:version: 1.4.193
+
+[start=0]
+== Vorbemerkung
+Wir geben in diesem Dokument Dateinamen im Windows-Format an. Für Linux ersetzen Sie bitte das Trennzeichen `\` durch `/`. 
+
+== Download 
+Die H2-Datenbank besteht aus nur einem `.jar`-File, das von `http://www.h2database.com/html/download.html` heruntergeladen werden kann. Im Seminar wird die Version _{version}_ genutzt.
+
+TIP: Bei Seminaren, die dieses Tool benötigen, wird der Download durch den Aufruf von `mvn`  im Verzeichnis `labs` bereits durchgeführt, d. h. das erwähnte File `h2-{version}.jar` finden Sie dann im Verzeichnis `tools\target`.
+
+== Verbindungsparameter
+Wir benutzen im Seminar eine Datenbank namens `seminar`, die ihre Daten im Verzeichnis `h2` unterhalb des Home-Verzeichnisses des aktuellen Users ablegt, d. h. in Windows üblicherweise in `c:\Users\<user_name>` oder `c:\Benutzer\<user_name>`. Für den Aufbau einer Verbindung zu dieser Datenbank werden die folgenden Verbindungsparameter benötigt:
+
+Driver:: `org.h2.Driver` +
+Dazu muss sich das heruntergeladene `.jar`-File im Classpath befinden. In den Demo- und Übungsprojekten mit DB-Zugriff ist das bereits der Fall. Ebenso ist der Application Server WildFly von Hause aus mit dem H2-Treiber ausgestattet.
+URL:: `jdbc:h2:~/h2/seminar;AUTO_SERVER=TRUE`
+User:: `seminar`
+Password:: `seminar`

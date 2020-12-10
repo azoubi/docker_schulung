@@ -1,0 +1,5 @@
+k8s_yaml(kustomize('src/main/k8s/demo_17/'))
+
+custom_build('gedoplan-seminar/ctr-demo-rest', 'mvn package -P docker-jib -Dimagetag=$EXPECTED_REF', ['.'], ignore='target')
+
+k8s_resource('rest-demo', port_forwards=8080)

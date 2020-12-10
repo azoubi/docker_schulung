@@ -1,0 +1,28 @@
+
+pipeline {
+  agent {
+    kubernetes {
+		  label 'rest-exercise-build'
+		  defaultContainer 'jnlp'
+      yamlFile 'src/main/jenkins/exercise_02/build-pod.yaml'
+	  }
+  }
+
+  stages {
+    stage('Maven Build') {
+		  steps {
+	      container('maven') {
+	        sh 'mvn -B package'
+	      }
+	    }
+	  }
+    stage('Docker Build') {
+		  steps {
+	      container('docker') {
+	        sh 'docker build -t gedoplan-seminar/ctr-exercise-rest .'
+	      }
+	    }
+	  }
+  }
+}
+

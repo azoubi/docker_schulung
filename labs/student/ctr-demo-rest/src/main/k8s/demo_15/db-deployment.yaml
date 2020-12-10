@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rest-demo-db
+spec:
+  selector:
+    matchLabels:
+      name: rest-demo-db
+  template:
+    metadata:
+      labels:
+        name: rest-demo-db
+    spec:
+      containers:
+      - image: postgres:11.4
+        imagePullPolicy: IfNotPresent
+        name:  db
+        ports:
+          - name: db
+            containerPort: 5432
+        env:
+          - name: POSTGRES_DB
+            valueFrom:
+              secretKeyRef:
+                key: database
+                name: rest-demo-db-secret
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                key: user
+                name: rest-demo-db-secret
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: password
+                name: rest-demo-db-secret
+        volumeMounts:
+          - mountPath: /var/lib/postgresql/data
+            name: db-volume
+        readinessProbe:
+          exec:
+            command: ["pg_isready", "-U", "$(POSTGRES_USER)", "-d", "$(POSTGRES_DB)", "-h", "localhost"]
+          initialDelaySeconds: 15
+          timeoutSeconds: 2
+        livenessProbe:
+          exec:
+            command: ["pg_isready", "-U", "$(POSTGRES_USER)", "-d", "$(POSTGRES_DB)", "-h", "localhost"]
+          initialDelaySeconds: 200
+          timeoutSeconds: 2
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+      volumes:
+      - name: db-volume
+        persistentVolumeClaim:
+          claimName: rest-demo-db

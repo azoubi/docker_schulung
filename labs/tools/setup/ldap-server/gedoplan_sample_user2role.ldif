@@ -1,0 +1,73 @@
+version: 1
+
+dn: dc=gedoplan,dc=de
+objectclass: top
+objectclass: domain
+dc: gedoplan
+
+dn: ou=roles,dc=gedoplan,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: roles
+
+dn: cn=guest,ou=roles,dc=gedoplan,dc=de
+objectClass: organizationalRole
+objectClass: extensibleObject
+objectClass: top
+cn: guest
+
+dn: cn=otherRole,ou=roles,dc=gedoplan,dc=de
+objectClass: organizationalRole
+objectClass: extensibleObject
+objectClass: top
+cn: otherRole
+
+dn: cn=demoRole,ou=roles,dc=gedoplan,dc=de
+objectClass: organizationalRole
+objectClass: extensibleObject
+objectClass: top
+cn: demoRole
+roleOccupant: cn=otherRole,ou=roles,dc=gedoplan,dc=de
+
+dn: ou=users,dc=gedoplan,dc=de
+objectClass: organizationalUnit
+objectClass: top
+ou: users
+
+dn: uid=anonymous,ou=users,dc=gedoplan,dc=de
+objectClass: extensibleObject
+objectClass: inetOrgPerson
+objectClass: person
+objectClass: organizationalPerson
+objectClass: top
+cn: anonymous
+sn: anonymous
+roleOccupant: cn=guest,ou=roles,dc=gedoplan,dc=de
+uid: anonymous
+userPassword: anonymous_123
+
+dn: uid=hugo,ou=users,dc=gedoplan,dc=de
+objectClass: extensibleObject
+objectClass: organizationalPerson
+objectClass: person
+objectClass: inetOrgPerson
+objectClass: top
+cn: Hugo Testuser
+sn: Testuser
+roleOccupant: cn=demoRole,ou=roles,dc=gedoplan,dc=de
+roleOccupant: cn=guest,ou=roles,dc=gedoplan,dc=de
+uid: hugo
+userPassword: hugo_123
+
+dn: uid=otto,ou=users,dc=gedoplan,dc=de
+objectClass: extensibleObject
+objectClass: organizationalPerson
+objectClass: person
+objectClass: inetOrgPerson
+objectClass: top
+cn: Otto Testuser
+sn: Testuser
+roleOccupant: cn=guest,ou=roles,dc=gedoplan,dc=de
+uid: otto
+userPassword: otto_123
+

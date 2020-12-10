@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  rest-demo
+spec:
+  selector:
+    matchLabels:
+      name: rest-demo
+  template:
+    metadata:
+      labels:
+        name:  rest-demo
+    spec:
+      serviceAccountName: seminar
+      initContainers:
+        - name: wait-for-db
+          image: lachlanevenson/k8s-kubectl:v1.13.5
+          command: ['sh', '-c', 'kubectl wait --timeout=60s --for=condition=ready pod -l name=rest-demo-db -n $(MY_POD_NAMESPACE)'] 
+          env:
+          - name: MY_POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+      containers:
+      - image:  gedoplan-seminar/ctr-demo-rest
+        name:  rest-demo
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort:  8080
+          name:  web
+        env:
+          - name: POSTGRES_DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: rest-demo-db-secret
+                key: database
+          - name: KUMULUZEE_DATASOURCES0_CONNECTIONURL
+            value: jdbc:postgresql://rest-demo-db:5432/$(POSTGRES_DATABASE)
+          - name: KUMULUZEE_DATASOURCES0_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: rest-demo-db-secret
+                key: user
+          - name: KUMULUZEE_DATASOURCES0_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: rest-demo-db-secret
+                key: password
+
+# The environment variables above replace KumuluzEE config values:
+#   KUMULUZEE_DATASOURCES0_CONNECTIONURL -> kumuluzee.datasources[0].connection-url
+#   KUMULUZEE_DATASOURCES0_USERNAME      -> kumuluzee.datasources[0].username
+#   KUMULUZEE_DATASOURCES0_PASSWORD      -> kumuluzee.datasources[0].password
+# The necessary driver is part of the demo application already
+
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10

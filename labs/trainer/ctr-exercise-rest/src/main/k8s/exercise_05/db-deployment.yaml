@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: exercise-db
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      name: exercise-db
+  template:
+    metadata:
+      labels:
+        name: exercise-db
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.0.3
+        ports:
+        - containerPort: 3306
+          name: db
+        env:
+          - name: MYSQL_ROOT_PASSWORD
+            value: root_123
+          - name: MYSQL_DATABASE
+            value: exercise
+          - name: MYSQL_USER
+            value: exercise
+          - name: MYSQL_PASSWORD
+            value: exercise_123
+        volumeMounts:
+          - mountPath: /var/lib/mysql
+            name: db-volume
+      volumes:
+      - name: db-volume
+        persistentVolumeClaim:
+          claimName: exercise-db

@@ -1,0 +1,590 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>de.gedoplan.training</groupId>
+  <artifactId>tools</artifactId>
+  <version>2020.05.25_NORDLB_H_CTR-003</version>
+  <packaging>pom</packaging>
+  <properties>
+    <!-- Properties for exclusion of tools. Negative logic - value has to be false, if tool is to be included! -->
+    <skip.derby>true</skip.derby>
+    <skip.h2>true</skip.h2>
+    <skip.hsql>true</skip.hsql>
+    <skip.ldap-browser>true</skip.ldap-browser>
+    <skip.ldap-server>true</skip.ldap-server>
+    <skip.mysql>true</skip.mysql>
+    <skip.openliberty>true</skip.openliberty>
+    <skip.payara>true</skip.payara>
+    <skip.restclient>false</skip.restclient>
+    <skip.sql-workbench>true</skip.sql-workbench>
+    <skip.tomee>true</skip.tomee>
+    <skip.wildfly>true</skip.wildfly>
+    <skip.visual-studio-code>true</skip.visual-studio-code>
+    <!-- Versions of tools -->
+    <version.derby>10.7.1.1</version.derby>
+    <version.h2>1.4.193</version.h2>
+    <version.hsql>2.5.0</version.hsql>
+    <version.ldap-browser>281</version.ldap-browser>
+    <version.ldap-server>2017-09-04</version.ldap-server>
+    <version.mysql>8.0.12</version.mysql>
+    <version.openliberty>19.0.0.1</version.openliberty>
+    <version.payara>5.192</version.payara>
+    <version.restclient>3.7.1</version.restclient>
+    <version.sql-workbench>125</version.sql-workbench>
+    <version.tomee>7.0.4</version.tomee>
+    <classifier.tomee>plume</classifier.tomee>
+    <version.wildfly>19.0.0.Final</version.wildfly>
+    <version.visual-studio-code>1.39.3</version.visual-studio-code>
+    <!-- Suppress install and deploy -->
+    <maven.install.skip>true</maven.install.skip>
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
+  <repositories>
+    <repository>
+      <id>gedoplanPublic</id>
+      <url>http://service.gedoplan.de/nexus/content/groups/public</url>
+    </repository>
+  </repositories>
+  <build>
+    <defaultGoal>install</defaultGoal>
+    <plugins>
+      <plugin>
+        <!-- Use dependency plugin for download maven artifacts and copy/unpack -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <version>3.0.1</version>
+        <inherited>false</inherited>
+        <configuration>
+          <outputDirectory>${project.build.directory}</outputDirectory>
+        </configuration>
+        <executions>
+
+          <!-- Download Derby driver jar -->
+          <execution>
+            <id>derby</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.apache.derby</groupId>
+                  <artifactId>derby</artifactId>
+                  <version>${version.derby}</version>
+                  <type>jar</type>
+                </artifactItem>
+              </artifactItems>
+              <skip>${skip.derby}</skip>
+            </configuration>
+          </execution>
+
+          <!-- Download H2 driver jar -->
+          <execution>
+            <id>h2</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>com.h2database</groupId>
+                  <artifactId>h2</artifactId>
+                  <version>${version.h2}</version>
+                  <type>jar</type>
+                </artifactItem>
+              </artifactItems>
+              <skip>${skip.h2}</skip>
+            </configuration>
+          </execution>
+
+          <!-- Download HSQL driver jar -->
+          <execution>
+            <id>hsql</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.hsqldb</groupId>
+                  <artifactId>hsqldb</artifactId>
+                  <version>${version.hsql}</version>
+                  <type>jar</type>
+                </artifactItem>
+              </artifactItems>
+              <skip>${skip.hsql}</skip>
+            </configuration>
+          </execution>
+
+          <!-- Download MySQL driver jar -->
+          <execution>
+            <id>mysql</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>copy</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>mysql</groupId>
+                  <artifactId>mysql-connector-java</artifactId>
+                  <version>${version.mysql}</version>
+                  <type>jar</type>
+                </artifactItem>
+              </artifactItems>
+              <skip>${skip.mysql}</skip>
+            </configuration>
+          </execution>
+
+          <!-- Download and unpack Payara -->
+          <execution>
+            <id>payara</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>fish.payara.distributions</groupId>
+                  <artifactId>payara</artifactId>
+                  <version>${version.payara}</version>
+                  <type>zip</type>
+                </artifactItem>
+              </artifactItems>
+              <skip>${skip.payara}</skip>
+            </configuration>
+          </execution>
+
+          <!-- Download and unpack TomEE -->
+          <execution>
+            <id>tomee</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.apache.tomee</groupId>
+                  <artifactId>apache-tomee</artifactId>
+                  <version>${version.tomee}</version>
+                  <classifier>${classifier.tomee}</classifier>
+                  <type>zip</type>
+                </artifactItem>
+              </artifactItems>
+              <skip>${skip.tomee}</skip>
+            </configuration>
+          </execution>
+
+          <!-- Download and unpack Visual Studio Code -->
+          <execution>
+            <id>visual-studio-code</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>de.gedoplan.training.tools</groupId>
+                  <artifactId>${artifactid.visual-studio-code}</artifactId>
+                  <version>${version.visual-studio-code}</version>
+                  <type>zip</type>
+                </artifactItem>
+              </artifactItems>
+              <skip>${skip.visual-studio-code}</skip>
+            </configuration>
+          </execution>
+
+          <!-- Download and unpack WildFly -->
+          <execution>
+            <id>wildfly</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.wildfly</groupId>
+                  <artifactId>wildfly-dist</artifactId>
+                  <version>${version.wildfly}</version>
+                  <type>zip</type>
+                </artifactItem>
+              </artifactItems>
+              <skip>${skip.wildfly}</skip>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <!-- Use liberty plugin for download of Open Liberty and server creation -->
+        <groupId>net.wasdev.wlp.maven.plugins</groupId>
+        <artifactId>liberty-maven-plugin</artifactId>
+        <version>2.0</version>
+        <configuration>
+          <skip>${skip.openliberty}</skip>
+          <assemblyArtifact>
+            <groupId>io.openliberty</groupId>
+            <artifactId>openliberty-runtime</artifactId>
+            <version>${version.openliberty}</version>
+            <type>zip</type>
+          </assemblyArtifact>
+          <assemblyInstallDirectory>${project.build.directory}/openliberty-${version.openliberty}</assemblyInstallDirectory>
+          <serverName>seminar</serverName>
+        </configuration>
+        <executions>
+          <!-- Download and unpack Open Liberty and create seminar server -->
+          <execution>
+            <id>create-server</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>create-server</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <!-- Use maven download plugin for downloading non-maven files (zip, jar, ...) -->
+        <groupId>com.googlecode.maven-download-plugin</groupId>
+        <artifactId>download-maven-plugin</artifactId>
+        <version>1.4.2</version>
+        <executions>
+          <!-- Download LDAP Browser -->
+          <execution>
+            <id>ldap-browser</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>wget</goal>
+            </goals>
+            <configuration>
+              <url>http://www.novell.com/coolsolutions/tools/downloads/browser${version.ldap-browser}.zip</url>
+				      <outputDirectory>${project.build.directory}</outputDirectory>
+              <outputFileName>ldap-browser.zip</outputFileName>
+              <skip>${skip.ldap-browser}</skip>
+            </configuration>
+          </execution>
+
+          <!-- Download kwart ldap server from GitHub -->
+          <execution>
+            <id>ldap-server</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>wget</goal>
+            </goals>
+            <configuration>
+              <url>https://github.com/kwart/ldap-server/releases/download/${version.ldap-server}/ldap-server.jar</url>
+				      <outputDirectory>${project.build.directory}/ldap-server</outputDirectory>
+              <outputFileName>ldap-server-${version.ldap-server}.jar</outputFileName>
+              <skip>${skip.ldap-server}</skip>
+            </configuration>
+          </execution>
+
+          <!-- Download and unpack SQL Workbench/J -->
+          <execution>
+            <id>sql-workbench</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>wget</goal>
+            </goals>
+            <configuration>
+              <url>http://www.sql-workbench.eu/Workbench-Build${version.sql-workbench}.zip</url>
+				      <outputDirectory>${project.build.directory}/sql-workbench</outputDirectory>
+              <unpack>true</unpack>
+              <skip>${skip.sql-workbench}</skip>
+            </configuration>
+          </execution>
+
+          <!-- Download and unpack WizTools RESTClient -->
+          <execution>
+            <id>restclient</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>wget</goal>
+            </goals>
+            <configuration>
+              <url>https://github.com/wiztools/rest-client/releases/download/${version.restclient}/restclient-ui-${version.restclient}.zip</url>
+				      <outputDirectory>${project.build.directory}</outputDirectory>
+              <unpack>true</unpack>
+              <skip>${skip.restclient}</skip>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <!-- Use antrun plugin for tool specific configurations -->
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>1.8</version>
+        <executions>
+          <!-- Unpack LDAP Browser and add demo config files -->
+          <execution>
+            <id>ldap-browser</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <unzip src="${project.build.directory}/ldap-browser.zip" dest="${project.build.directory}/">
+                  <mapper type="glob" from="ldapbrowser/*" to="ldap-browser/*" />
+                </unzip>
+                <delete file="${project.build.directory}/ldap-browser.zip" />
+                <copy todir="${project.build.directory}/ldap-browser" overwrite="true">
+                  <fileset dir="${basedir}/setup/ldap-browser" />
+                </copy>
+              </target>
+              <skip>${skip.ldap-browser}</skip>
+            </configuration>
+          </execution>
+
+          <!-- LDAP server: Add demo config files -->
+          <execution>
+            <id>ldap-server</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <copy todir="${project.build.directory}/ldap-server" overwrite="true">
+                  <fileset dir="${basedir}/setup/ldap-server" />
+                </copy>
+              </target>
+              <skip>${skip.ldap-server}</skip>
+            </configuration>
+          </execution>
+
+          <!-- Open Liberty: Add H2 driver; configure datources etc. -->
+          <execution>
+            <id>openliberty</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="maven.plugin.classpath" />
+                <if>
+                  <not>
+                    <available file="${project.build.directory}/openliberty-${version.openliberty}/wlp/usr/shared/resources/h2" type="dir" />
+                  </not>
+                  <then>
+                    <echo message="Adding datasources etc. to Open Liberty configuration seminar" />
+                    <mkdir dir="${project.build.directory}/openliberty-${version.openliberty}/wlp/usr/shared/resources/h2" />
+                    <copy todir="${project.build.directory}/openliberty-${version.openliberty}/wlp/usr/shared/resources/h2">
+                      <fileset dir="${project.build.directory}">
+                        <include name="h2-*.jar" />
+                      </fileset>
+                    </copy>
+                    <copy todir="${project.build.directory}/openliberty-${version.openliberty}/wlp" overwrite="true">
+                      <fileset dir="${basedir}/setup/openliberty" />
+                      <filterset>
+                        <filter token="wlp_home" value="${project.build.directory}${file.separator}openliberty-${version.openliberty}${file.separator}wlp" />
+                      </filterset>
+                    </copy>
+                  </then>
+                </if>
+              </target>
+              <skip>${skip.openliberty}</skip>
+            </configuration>
+          </execution>
+
+          <!-- Payara: Create seminar domain -->
+          <execution>
+            <id>payara</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="maven.plugin.classpath" />
+                <if>
+                  <not>
+                    <available file="${project.build.directory}/payara5/glassfish/domains/seminar" type="dir" />
+                  </not>
+                  <then>
+                    <if>
+                      <os family="windows" />
+                      <then>
+                        <exec executable="cmd">
+                          <arg value="/c" />
+                          <arg value="${project.build.directory}/payara5/bin/asadmin.bat" />
+                          <arg value="create-domain" />
+                          <arg value="--template=./setup/payara/templates/seminar-domain.jar" />
+                          <arg value="--nopassword" />
+                          <arg value="seminar" />
+                        </exec>
+                      </then>
+                      <else>
+                        <exec executable="${project.build.directory}/payara5/bin/asadmin">
+                          <arg value="create-domain" />
+                          <arg value="--template=./setup/payara/templates/seminar-domain.jar" />
+                          <arg value="--nopassword" />
+                          <arg value="seminar" />
+                        </exec>
+                      </else>
+                    </if>
+                  </then>
+                </if>
+              </target>
+              <skip>${skip.payara}</skip>
+            </configuration>
+          </execution>
+
+          <!-- TomEE: Create seminar server; add H2 driver; configure datources etc. -->
+          <execution>
+            <id>tomee</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="maven.plugin.classpath" />
+                <if>
+                  <not>
+                    <available file="${project.build.directory}/apache-tomee-${classifier.tomee}-${version.tomee}/base/seminar" type="dir" />
+                  </not>
+                  <then>
+                    <echo message="Creating TomEE configuration seminar" />
+                    <copy todir="${project.build.directory}/apache-tomee-${classifier.tomee}-${version.tomee}/base/seminar">
+                      <fileset dir="${project.build.directory}/apache-tomee-${classifier.tomee}-${version.tomee}">
+                        <include name="conf/**" />
+                        <include name="webapps/**" />
+                      </fileset>
+                    </copy>
+                    <mkdir dir="${project.build.directory}/apache-tomee-${classifier.tomee}-${version.tomee}/base/seminar/bin" />
+                    <mkdir dir="${project.build.directory}/apache-tomee-${classifier.tomee}-${version.tomee}/base/seminar/lib" />
+                    <mkdir dir="${project.build.directory}/apache-tomee-${classifier.tomee}-${version.tomee}/base/seminar/logs" />
+                    <mkdir dir="${project.build.directory}/apache-tomee-${classifier.tomee}-${version.tomee}/base/seminar/temp" />
+                    <mkdir dir="${project.build.directory}/apache-tomee-${classifier.tomee}-${version.tomee}/base/seminar/work" />
+                    <copy todir="${project.build.directory}/apache-tomee-${classifier.tomee}-${version.tomee}/base/seminar" overwrite="true">
+                      <fileset dir="${basedir}/setup/tomee" />
+                      <filterset>
+                        <filter token="tomee_home" value="${project.build.directory}${file.separator}apache-tomee-${classifier.tomee}-${version.tomee}" />
+                      </filterset>
+                    </copy>
+                    <copy todir="${project.build.directory}/apache-tomee-${classifier.tomee}-${version.tomee}/base/seminar/lib">
+                      <fileset dir="${project.build.directory}">
+                        <include name="h2-*.jar" />
+                      </fileset>
+                    </copy>
+                  </then>
+                </if>
+              </target>
+              <skip>${skip.tomee}</skip>
+            </configuration>
+          </execution>
+
+          <!-- WildFly: Create seminar server; configure datources etc. -->
+          <execution>
+            <id>wildfly</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpathref="maven.plugin.classpath" />
+                <if>
+                  <not>
+                    <available file="${project.build.directory}/wildfly-${version.wildfly}/standalone-seminar" type="dir" />
+                  </not>
+                  <then>
+                    <echo message="Creating WildFly configuration standalone-seminar" />
+                    <copy todir="${project.build.directory}/wildfly-${version.wildfly}/standalone-seminar">
+                      <fileset dir="${project.build.directory}/wildfly-${version.wildfly}/standalone">
+                        <exclude name="configuration/standalone*.xml" />
+                      </fileset>
+                    </copy>
+                    <copy todir="${project.build.directory}/wildfly-${version.wildfly}/standalone-seminar">
+                      <fileset dir="${project.build.directory}/wildfly-${version.wildfly}/standalone">
+                        <include name="configuration/standalone-full.xml" />
+                      </fileset>
+                    </copy>
+                    <copy todir="${project.build.directory}/wildfly-${version.wildfly}/standalone-seminar" overwrite="true">
+                      <fileset dir="${basedir}/setup/wildfly">
+                        <exclude name="standalone-seminar.cli" />
+                      </fileset>
+                    </copy>
+                    <java jar="${project.build.directory}/wildfly-${version.wildfly}/bin/client/jboss-cli-client.jar" fork="true" failonerror="true">
+                      <env key="JBOSS_HOME" path="${project.build.directory}/wildfly-${version.wildfly}" />
+                      <jvmarg value="${wildfly.java9.cmd-args}" />
+                      <sysproperty key="jboss.server.base.dir" path="${project.build.directory}/wildfly-${version.wildfly}/standalone-seminar" />
+                      <arg value="--file=${basedir}/setup/wildfly/standalone-seminar.cli" />
+                    </java>
+                  </then>
+                </if>
+              </target>
+              <skip>${skip.wildfly}</skip>
+            </configuration>
+          </execution>
+
+        </executions>
+
+        <dependencies>
+          <dependency>
+            <groupId>ant-contrib</groupId>
+            <artifactId>ant-contrib</artifactId>
+            <version>20020829</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+    </plugins>
+  </build>
+  <profiles>
+    <!-- JDK Version 9 und hoeher: zusaetzliche jvm args fuer wildfly tool config -->
+    <profile>
+      <id>java-9-or-higher</id>
+      <activation>
+        <jdk>[9,)</jdk>
+      </activation>
+      <properties>
+        <wildfly.java9.cmd-args>--add-modules=java.se</wildfly.java9.cmd-args>
+      </properties>
+    </profile>
+    <!-- JDK vor Version 9: keine weiteren jvm args fuer wildfly tool config -->
+    <profile>
+      <id>java-8-or-lower</id>
+      <activation>
+        <jdk>(,8]</jdk>
+      </activation>
+      <properties>
+        <wildfly.java9.cmd-args />
+      </properties>
+    </profile>
+
+    <!-- Betriebssystem-abhängig Properties setzen -->
+    <profile>
+      <id>linux</id>
+      <activation>
+        <os>
+          <family>unix</family>
+        </os>
+      </activation>
+      <properties>
+        <artifactid.visual-studio-code>visual-studio-code-LINUX</artifactid.visual-studio-code>
+      </properties>
+    </profile>
+    <profile>
+      <id>windows</id>
+      <activation>
+        <os>
+          <family>windows</family>
+        </os>
+      </activation>
+      <properties>
+        <artifactid.visual-studio-code>visual-studio-code</artifactid.visual-studio-code>
+      </properties>
+    </profile>
+  </profiles>
+</project>

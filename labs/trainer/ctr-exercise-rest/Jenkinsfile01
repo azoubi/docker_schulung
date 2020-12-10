@@ -1,0 +1,21 @@
+
+pipeline {
+  agent {
+    kubernetes {
+		  label 'rest-exercise-build'
+		  defaultContainer 'jnlp'
+      yamlFile 'src/main/jenkins/exercise_01/build-pod.yaml'
+	  }
+  }
+
+  stages {
+    stage('Maven Build') {
+		  steps {
+	      container('maven') {
+	        sh 'mvn -B package'
+	      }
+	    }
+	  }
+  }
+}
+

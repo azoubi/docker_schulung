@@ -1,0 +1,76 @@
+[separator=::]
+= Payara: Installation und Konfiguration des Application Servers
+
+:toc: left
+:imagesdir: ./images
+
+:version: 5.192
+
+[start=0]
+== Vorbemerkung
+Wir geben in diesem Dokument Dateinamen im Windows-Format an. Für Linux ersetzen Sie bitte das Trennzeichen `\` durch `/`. 
+
+Kommandoskripte sind für Windows i. d. R. `.bat`-Dateien (teilweise sind auch `.cmd` oder `.ps1` vorhanden). Unter Linux nehem Sie stattdessen `.sh`-Dateien.
+
+
+== Installation und Konfiguration der Server Runtime für das Seminar
+
+TIP: Bei Seminaren, die Payara benötigen, werden die hier beschriebenen Schritte (Download, Installation, Anpassen der Konfiguration, Einrichten von Ressourcen) durch den Aufruf von `mvn`  im Verzeichnis `labs` bereits durchgeführt. Der Server steht Ihnen im Verzeichnis `labs\tools\target\payara5` zur Verfügung. Das Unterverzeichnis `domains\seminar` enthält die für das Seminar angepasste Serverkonfiguration.
+
+=== Download und Installation
+Payara kann von https://www.payara.fish/software/downloads/all-downloads/ heruntergeladen werden. Im Seminar wird der sog. _Payara Server Full_ in der Version _{version}_ genutzt.
+
+Das heruntergeladene File `payara-{version}.zip` kann an beliebiger Stelle entpackt werden. Dabei entsteht ein neues Verzeichnis namens `payara5`. Im Rest dieses Dokumentes wird dieses Verzeichnis mit `<payara_home>` bezeichnet. 
+
+=== Erzeugung einer an das Seminar angepassten Konfiguration
+Payara-Konfigurationen werden in sog. Domänen abgelegt. Die Seminar-Domäne wird durch den folgenden Befehl im Verzeichnis `<payara_home>\bin` erzeugt: +
+`asadmin create-domain --template=<tools_home>/setup/payara/templates/seminar-domain.jar --nopassword seminar`
+
+`<tools_home>` ist dabei das Verzeichnis namens `tools` zwei Ebenen oberhalb des Verzeichnisses, in dem diese Dokumentationsdatei liegt.
+
+Das Template `seminar-domain.jar` entspricht dem Default-Template, das zur Erzeugung von Domänen genutzt wird (`payara_home\glassfish\common\templates\gf\appserver-domain.jar`) ergänzt um die folgenden Einstellungen:
+
+* Konfiguration einer Datasource mit diesen Parametern:
+** JNDI-Name: `jdbc/seminar`
+** Datenbank-Typ: H2
+** URL: `jdbc:h2:~/h2/seminar;AUTO_SERVER=TRUE`
+** User: `seminar`
+** Passwort: `seminar`
+
+=== Start und Stopp des Servers
+Der Server wird durch den folgenden Befehl gestartet: +
+`<payara_home>\bin\asadmin start-domain seminar` +
+
+Zum Stopp des Servers nutzen Sie folgenden Befehl: +
+`<payara_home>\bin\asadmin stop-domain seminar` +
+
+TIP: Im Seminar (und auch sonst zur Entwicklung von Software) ist es empfehlenswert, den Server nicht wie gezeigt separat zu starten, sondern ihn in die genutzte IDE zu integrieren und von dort zu kontrollieren. 
+
+
+== Integration des Servers in die IDE
+=== Eclipse
+* Eclipse enthält in der Grundkonfiguration keine Integration für Payara. Um diese zu erhalten, installieren Sie die sog. _Payara Tools_ aus dem _Eclipse Marketplace_ (http://marketplace.eclipse.org/content/payara-tools).
+* Fügen Sie die View `Servers` Ihrer genutzten Perspektive hinzu. Dazu nutzen Sie den Menüpunkte `Window` -> `Preferences` -> `Show View` -> `Other...`  und wählen die View namens `Servers` aus. 
+* Klicken Sie mit der rechten Maustaste in den freien Bereich der View `Servers` , wählen aus dem Kontextmenü `New` -> `Server`, klicken aus dem Ordner `Payara` den Eintrag `Payara` und nennen den neuen Eintrag `Payara {version}`.
+
+image::eclipse-server.png[]
+
+* Nach Klick auf `Next` konfigurieren Sie die _Payara Runtime_ mit den folgenden Parametern: +
+Name: (Default Value) +
+Home Directory: `<payara_home>` +
+Runtime JRE: JDK der Version `8` oder `11` +
+
+image::eclipse-runtime.png[]
+
+* Nach einem weiteren Klick auf `Next` ändern Sie den _Domain Path_ in `<payara_home>\glassfish\domains\seminar`
+
+image::eclipse-domain.png[]
+
+* Nach Abschluss des Konfigurationsdialogs mit `Finish` erscheint ein entsprechender Eintrag in der View `Servers`. Nach einem Rechtsklick darauf kann der Server gestartet (und später auch wieder gestoppt) werden. 
+
+image::eclipse-startstop.png[]
+
+== Deployment von Anwendungen
+Anwendungen können per Drag-and-Drop in den Server gebracht werden. Dazu ziehen Sie das gewünschte Projekt aus der View `Package Explorer` (oder `Projekt Explorer`) auf den Servereintrag in der View `Servers`. Die Anwendung erscheint dann dort eingerückt unterhalb des Servereintrags und kann mit einem Rechtsklick wieder entfernt werden (`Remove`). Nach Code-Änderungen können Sie die Anwendung mit `Restart` aktualisieren.
+
+image::eclipse-deployment.png[]

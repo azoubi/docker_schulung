@@ -1,0 +1,13 @@
+FROM debian:stretch
+
+ENV CORRETTO_VERSION 11.0.3.7.1
+
+RUN apt-get update && apt-get install -y curl && \
+    mkdir -p /opt/java && \
+    cd /opt/java && \
+    curl https://d3pxv6yz143wms.cloudfront.net/${CORRETTO_VERSION}/amazon-corretto-${CORRETTO_VERSION}-linux-x64.tar.gz | tar xzf - && \
+    mv amazon-corretto-${CORRETTO_VERSION}-linux-x64 jdk
+
+ENV JAVA_HOME /opt/java/jdk
+
+ENV PATH="${JAVA_HOME}/bin:${PATH}"

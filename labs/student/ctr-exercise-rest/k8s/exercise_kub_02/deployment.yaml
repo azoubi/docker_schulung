@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rest-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: rest-app
+  template:
+    metadata:
+      labels:
+        name: rest-app
+    spec:
+      containers:
+        - image:  izoubi/rest-app
+          name:  rest-demo
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort:  8080
+              name:  web

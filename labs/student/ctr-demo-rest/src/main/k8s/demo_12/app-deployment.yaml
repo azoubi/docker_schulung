@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  rest-demo
+spec:
+  selector:
+    matchLabels:
+      name: rest-demo
+  template:
+    metadata:
+      labels:
+        name:  rest-demo
+    spec:
+      containers:
+      - image:  gedoplan-seminar/ctr-demo-rest
+        name:  rest-demo
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort:  8080
+          name:  web
+        env:
+          - name: TEXTFILE_FILENAME
+            valueFrom:
+              configMapKeyRef:
+                name: rest-demo-config
+                key: filename
+          - name: DEMO_TEXT_FILE
+            value: /demodata/$(TEXTFILE_FILENAME)
+        volumeMounts:
+          - name: config
+            mountPath: /demodata
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+      volumes:
+        - name: config
+          configMap:
+            name: rest-demo-config

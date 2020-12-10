@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  rest-demo
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rest-demo
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: rest-demo
+    spec:
+      serviceAccountName: seminar
+      initContainers:
+        - name: wait-for-db
+          image: lachlanevenson/k8s-kubectl:v1.13.5
+          command: ['sh', '-c', 'kubectl wait --timeout=60s --for=condition=ready pod -l app.kubernetes.io/name=postgres -n $(MY_POD_NAMESPACE)'] 
+          env:
+          - name: MY_POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+      containers:
+      - image:  gedoplan-seminar/ctr-demo-rest
+        name:  rest-demo
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort:  8080
+          name:  web
+        env:
+          - name: KUMULUZEE_DATASOURCES0_USERNAME
+            valueFrom:   
+              secretKeyRef:
+                name: rest-demo-db-secret
+                key: user
+          - name: KUMULUZEE_DATASOURCES0_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: rest-demo-db-secret
+                key: password
+          - name: POSTRES_DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: rest-demo-db-secret
+                key: database
+          - name: KUMULUZEE_DATASOURCES0_CONNECTIONURL
+            value: jdbc:postgresql://rest-demo-db:5432/$(POSTRES_DATABASE)
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          timeoutSeconds: 2
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3

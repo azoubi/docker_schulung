@@ -1,0 +1,40 @@
+[separator=::]
+= RESTClient: Test-Client für RESTful Webservices
+
+:toc: left
+:imagesdir: ./images
+
+:version: 3.7.1
+
+[start=0]
+== Vorbemerkung
+Wir geben in diesem Dokument Dateinamen im Windows-Format an. Für Linux ersetzen Sie bitte das Trennzeichen `\` durch `/`. 
+
+== Download 
+RESTClient ist ein in Java geschriebener Client zum Aufruf von RESTful Webservices. Die Anwendung kann von  `https://github.com/wiztools/rest-client/releases` heruntergeladen werden. Im Seminar wird die Version _{version}_ genutzt.
+
+TIP: Bei Seminaren, die dieses Tool benötigen, wird der Download durch den Aufruf von `mvn`  im Verzeichnis `labs` bereits durchgeführt und die Anwendung im Verzeichnis  `tools\target\restclient-ui-{version}` bereitgestellt.
+
+== Start und Benutzung der Anwendung
+Im Verzeichnis `tools\target\restclient-ui-{version}\bin` finden Sie das Kommandos zum Start der Anwendung:
+
+Windows:: `restclient-ui.bat`
+Linux:: `restclient-ui`
+
+image::wiztools_restclient.png[]
+
+Nach Eingabe der URL, Auswahl der HTTP Method und Angabe evtl. benötigter Header kann mit dem Button `>>` ein Request ausgelöst werden. Der Response wird dann im unteren Teil des Dialogs angezeigt.
+
+== Alternative: Browser Plugins
+
+=== Firefox: Add-on `RESTClient`
+
+In den Browser _Firefox_ können Sie mit Hilfe des _Add-on Managers_ (URL `about:addons`) das Add-on `RESTClient` von _Chao ZHOU_ integrieren. Es bietet die gleiche Funktionalität des o. a. Standalone-Programms als Anwendung im Browser mit etwas ansprechenderer Benutzeroberfläche. Es wird nach der Installation mit Hilfe des braunen Icons in der Toolbar des Browsers gestartet.
+
+image::firefox_restclient.png[]
+
+=== Chrome: Extension `Rest Web Service Client`
+
+In den Browser _Chrome_ können Sie über den _Extensions_-Dialog (URL `chrome://extensions`) die Extension `Rest Web Service Client` von _Wenkui_ integrieren. Auch diese Extension bietet die o. a. Funktionen als im Browser laufende Anwendung an. Sie wird nach der Installation mit Hilfe des zugehörigen Icons in der Toolbar des Browsers gestartet.
+
+image::chrome_webserviceclient.png[]

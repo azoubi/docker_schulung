@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+bases:
+  - ../../bases
+
+secretGenerator:
+- name: rest-demo-db-secret
+  behavior: merge
+  literals:
+  - database=restdemo_test
+  - user=restdemo_test
+  - password=restdemo_test_123
+
+configMapGenerator:
+- name: test-textfile
+  files:
+  - textfile.txt
+
+patchesStrategicMerge:
+- patch-app-deployment.yaml
+- patch-resources.yaml
+
+commonLabels:
+  env: test
